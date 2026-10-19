@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="deepsea">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/png" href="assets/avatar.png?v=1">
+  <meta name="theme-color" content="#04121c">
+  <script src="theme.js"></script>
+  <title>作品 · 蓝色大肥鱼</title>
+  <meta name="description" content="按类型、角色、合集和关键词浏览 AI 娘二创作品。">
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel="preconnect" href="https://raw.githubusercontent.com" crossorigin>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/harmonyos-sans-webfont-splitted@1.2.1/dist/HarmonyOS_Sans_SC/Regular.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/harmonyos-sans-webfont-splitted@1.2.1/dist/HarmonyOS_Sans_SC/Medium.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/harmonyos-sans-webfont-splitted@1.2.1/dist/HarmonyOS_Sans_SC/Bold.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/noto-serif@5.3.0/400.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/noto-serif@5.3.0/500.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/noto-serif@5.3.0/700.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/noto-serif-sc@5.3.1/400.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/noto-serif-sc@5.3.1/500.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/noto-serif-sc@5.3.1/700.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/daisyui@4.12.24/dist/styled.css">
+  <link rel="stylesheet" href="deepsea.css?v=20261018-hero-8">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: { extend: { fontFamily: { sans: ['"HarmonyOS Sans SC"', '"HarmonyOS Sans"', '"PingFang SC"', 'system-ui', 'sans-serif'] } } }
+    };
+  </script>
+</head>
+<body data-page="works">
+  <a class="skip-link" href="#main" data-i18n="a11y.skip">跳到主要内容</a>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <button class="icon-btn sidebar-trigger" type="button" data-open-sidebar aria-controls="sidebar" aria-expanded="false" aria-haspopup="dialog" aria-label="打开侧边栏" data-i18n-aria="sidebar.open"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+      <a class="brand" href="index.html" aria-label="蓝色大肥鱼 首页" data-i18n-aria="a11y.home">
+        <span class="brand-mark" aria-hidden="true"><img src="assets/avatar.png?v=1" alt="" width="28" height="28" decoding="async"></span>
+        <span>蓝色大肥鱼</span>
+      </a>
+      <nav class="topnav" aria-label="主导航" data-i18n-aria="a11y.nav"><a href="works.html" aria-current="page"><svg class="ds-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="icons.svg#squares-2x2"></use></svg><span data-i18n="nav.works">作品</span></a><a href="characters.html"><svg class="ds-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="icons.svg#users"></use></svg><span data-i18n="nav.characters">角色</span></a><a href="topics.html"><svg class="ds-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="icons.svg#rectangle-stack"></use></svg><span data-i18n="nav.collections">合集</span></a><a href="community.html"><svg class="ds-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="icons.svg#chat-bubble-left-right"></use></svg><span data-i18n="nav.community">社群</span></a></nav>
+      <div class="top-actions">
+        <form class="search" action="works.html" method="get" role="search">
+          <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m16.5 16.5 4 4"/></svg>
+          <input class="input" type="search" name="q" autocomplete="off" placeholder="搜作品、角色或标签…" aria-label="搜作品、角色或标签" data-i18n-aria="a11y.search" data-i18n-placeholder="search.placeholder">
+        </form>
+        <button class="icon-btn theme-toggle" type="button" data-theme-toggle aria-label="切换到浅色模式" title="切换到浅色模式">
+          <svg class="ds-icon theme-icon-sun" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="icons.svg#sun"></use></svg>
+          <svg class="ds-icon theme-icon-moon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="icons.svg#moon"></use></svg>
+        </button>
+        <div class="lang" role="group" aria-label="语言" data-i18n-aria="a11y.language">
+          <button type="button" data-lang="zh" aria-pressed="true">中</button>
+          <button type="button" data-lang="en" aria-pressed="false">EN</button>
+          <button type="button" data-lang="ja" aria-pressed="false">日</button>
+        </div>
+        <a class="submit-link" href="https://github.com/lmy414/ai-girl-stickers/issues/new/choose" target="_blank" rel="noreferrer">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+          <span data-i18n="nav.submit">投稿</span>
+        </a>
+        <button class="icon-btn mobile-only" type="button" data-open-search aria-controls="mobile-search" aria-expanded="false" aria-label="搜索" data-i18n-aria="a11y.searchShort">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m16.5 16.5 4 4"/></svg>
+        </button>
+      </div>
+    </div>
+    <form class="mobile-search" id="mobile-search" action="works.html" method="get" role="search" hidden>
+      <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m16.5 16.5 4 4"/></svg>
+      <input class="input" type="search" name="q" autocomplete="off" placeholder="搜作品、角色或标签…" aria-label="搜作品、角色或标签" data-i18n-aria="a11y.search" data-i18n-placeholder="search.placeholder">
+    </form>
+  </header>
+<main class="page-main library-page" id="main">
+  <header class="page-head"><div><h1 data-i18n="works.title">作品</h1><p class="page-fact" data-i18n="works.fact">按类型、角色或关键词，找你想看的图。</p></div><button class="btn btn-outline" type="button" data-random><svg class="ds-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="icons.svg#arrows-right-left"></use></svg><span data-i18n="hero.random">随机一件</span></button></header>
+  <div class="library-toolbar"><div class="type-tabs" id="type-tabs" role="group" aria-label="作品类型" data-i18n-aria="sidebar.types"></div><label class="sort-field"><span data-i18n="filter.sort">排序</span><select class="select" id="sort-select"><option value="new" data-i18n="sort.new">最新</option><option value="old" data-i18n="sort.old">最早</option><option value="random" data-i18n="sort.random">随机</option></select></label></div>
+  <div class="filter-bar"><label class="filter-field"><span data-i18n="filter.char">角色</span><select class="select" id="char-select"></select></label><label class="filter-field"><span data-i18n="filter.topic">合集</span><select class="select" id="topic-select"></select></label><button class="filter-clear" type="button" id="clear-filters"><svg class="ds-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="icons.svg#arrow-path"></use></svg><span data-i18n="filter.clear">清除筛选</span></button><p class="result-line" role="status"><strong id="result-count">…</strong><span id="result-unit" data-i18n="works.unit">件作品</span><span class="result-filters" id="result-filters"></span></p></div>
+  <div class="work-grid" id="work-grid" aria-live="polite"></div><div class="load-more-wrap"><button class="btn btn-outline" id="load-more" type="button" hidden>加载更多</button></div>
+  <footer class="site-footer"><div class="footer-inner"><div><a class="footer-brand" href="index.html">蓝色大肥鱼</a><p class="footer-note" data-i18n="footer.note">非官方同人整理。图片版权归原作者，代码 MIT。</p></div><div class="footer-links"><a href="community.html"><svg class="ds-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="icons.svg#chat-bubble-left-right"></use></svg><span data-i18n="nav.community">社群</span></a><a href="https://xn--pssy23gqgbz2d718b.com/submit.html" target="_blank" rel="noreferrer"><svg class="ds-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="icons.svg#plus"></use></svg><span data-i18n="nav.submit">投稿</span></a><a href="https://github.com/lmy414/bluedafeiyu" target="_blank" rel="noreferrer">GitHub</a></div></div></footer>
+</main>
+  <dialog id="sidebar" class="sheet" aria-label="浏览与筛选" data-i18n-aria="sidebar.title">
+    <div class="sheet-head"><a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true"><img src="assets/avatar.png?v=1" alt="" width="28" height="28" decoding="async"></span>蓝色大肥鱼</a><button class="icon-btn" type="button" data-close-dialog aria-label="关闭侧边栏" data-i18n-aria="sidebar.close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button></div>
+    <nav class="sheet-nav" aria-label="主导航" data-i18n-aria="a11y.nav"><a href="works.html" aria-current="page"><svg class="ds-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="icons.svg#squares-2x2"></use></svg><span data-i18n="nav.works">作品</span></a><a href="characters.html"><svg class="ds-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="icons.svg#users"></use></svg><span data-i18n="nav.characters">角色</span></a><a href="topics.html"><svg class="ds-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="icons.svg#rectangle-stack"></use></svg><span data-i18n="nav.collections">合集</span></a><a href="community.html"><svg class="ds-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="icons.svg#chat-bubble-left-right"></use></svg><span data-i18n="nav.community">社群</span></a></nav>
+    <section class="sidebar-types" aria-labelledby="sidebar-type-title">
+      <h2 id="sidebar-type-title" data-i18n="sidebar.types">按类型看作品</h2>
+      <div class="rail-list" id="rail-list"><a class="rail-item" href="works.html"><span data-i18n="recent.all">全部作品</span><svg class="ds-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="icons.svg#arrow-right"></use></svg></a></div>
+    </section>
+    <div class="sidebar-bottom"><a class="sheet-utility" href="favorites.html"><svg class="ds-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="icons.svg#heart"></use></svg><span data-i18n="nav.favorites">收藏</span></a>
+      <div class="lang" role="group" aria-label="语言" data-i18n-aria="a11y.language"><button type="button" data-lang="zh" aria-pressed="true">中</button><button type="button" data-lang="en" aria-pressed="false">EN</button><button type="button" data-lang="ja" aria-pressed="false">日</button></div>
+      <a class="submit-link sheet-submit" href="https://xn--pssy23gqgbz2d718b.com/submit.html" target="_blank" rel="noreferrer"><svg class="ds-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="icons.svg#plus"></use></svg><span data-i18n="nav.submit">投稿</span></a>
+    </div>
+  </dialog>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="prototype.js"></script>
+</body>
+</html>

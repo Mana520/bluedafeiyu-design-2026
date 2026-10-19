@@ -247,7 +247,7 @@
   });
   $('#charGrid').addEventListener('click', function (e) {
     var b = e.target.closest('.char-card');
-    if (b) setChar(b.dataset.char, true);
+    if (b) window.location.href = './characters.html?c=' + encodeURIComponent(b.dataset.char);
   });
 
   var timer = null;

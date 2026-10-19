@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="day">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#f6fbfe" id="themeColor">
+<title>角色档案 · 潮汐档案馆</title>
+<meta name="description" content="蓝色大肥鱼 AI 娘二创档案的角色页：按角色看她的档案色、标签与全部作品。">
+<script>
+(function () {
+  try {
+    var saved = localStorage.getItem('tidal-theme');
+    var dark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    document.documentElement.setAttribute('data-theme', saved || (dark ? 'night' : 'day'));
+  } catch (e) {
+    document.documentElement.setAttribute('data-theme', 'day');
+  }
+})();
+</script>
+<link rel="stylesheet" href="../../starter/tokens.css">
+<link rel="stylesheet" href="./style.css">
+<link rel="stylesheet" href="./characters.css">
+</head>
+<body>
+<div class="bg" aria-hidden="true">
+  <div class="bg-day"></div>
+  <div class="bg-night"></div>
+</div>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a class="brand" href="./index.html" aria-label="回到潮汐档案馆首页">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M2.6 12.5c2.4-4 6-6 10.2-6 2.5 0 4.6.8 6.5 2.4l2.3-1.3-.4 2.9.9 1.8-2.6.7c-1.6 2.6-4.3 4.1-7.9 4.1-3.8 0-6.9-1.6-9-4.6Z" fill="currentColor"/><circle cx="7.8" cy="10.5" r="1" fill="#061a33"/></svg>
+      </span>
+      <span class="brand-text">
+        <span class="brand-name">蓝色大肥鱼</span>
+        <span class="brand-sub">TIDAL ARCHIVE</span>
+      </span>
+    </a>
+    <nav class="main-nav" aria-label="主导航">
+      <a href="./index.html">首页</a>
+      <a href="./characters.html" aria-current="page">角色</a>
+      <a href="./index.html#archive">档案库</a>
+      <a href="./index.html#about">关于</a>
+    </nav>
+    <div class="header-actions">
+      <button class="tide-toggle" id="themeToggle" type="button" aria-pressed="false" aria-label="切换潮位：浅滩与深潜">
+        <span class="tide-label" id="tideLabel">浅滩</span>
+        <span class="tide-track" aria-hidden="true"><span class="tide-knob"></span></span>
+      </button>
+      <button class="coin-btn" id="feedBtn" type="button" title="投喂一枚 token，随机看一条她的作品">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="8.4" stroke="currentColor" stroke-width="1.5"/><path d="M7.6 12.4c1.2-1.6 3-2.4 5-2.4 1.2 0 2.2.4 3.1 1.1l1.2-.7-.2 1.5.4.9-1.3.3c-.8 1.3-2.2 2-3.9 2-1.9 0-3.4-.8-4.3-2.7Z" fill="currentColor"/></svg>
+        <span class="coin-label">投喂</span><span id="tokenCount">0</span>
+      </button>
+      <a class="btn btn-primary btn-cta" href="https://xn--pssy23gqgbz2d718b.com/submit.html" target="_blank" rel="noopener">投稿</a>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="c-top">
+    <div class="container">
+      <p class="c-crumb"><a href="./index.html">← 潮汐档案馆</a><span class="sep">/</span><span>角色档案</span></p>
+    </div>
+  </div>
+
+  <section class="c-page">
+    <div class="container c-layout">
+      <aside class="c-rail" id="cRail" aria-label="角色列表"></aside>
+      <div class="c-main">
+        <article class="c-hero" id="cHero" style="--c:var(--bright)">
+          <figure class="c-cover">
+            <img id="cCover" alt="">
+            <span class="c-cover-cap" id="cCoverCap"></span>
+          </figure>
+          <div class="c-info">
+            <p class="eyebrow">CHARACTER ARCHIVE</p>
+            <h1 class="c-name" id="cName">—</h1>
+            <p class="c-alias" id="cAlias"></p>
+            <p class="c-stats" id="cStats"></p>
+            <blockquote class="c-quote" id="cQuote" hidden><span>她说</span><p></p></blockquote>
+            <div class="c-tags" id="cTags"></div>
+          </div>
+        </article>
+
+        <div class="toolbar">
+          <div class="filter-row" id="cCatFilters"><span class="filter-label">类型</span></div>
+        </div>
+        <div class="grid" id="cGrid"></div>
+        <p class="empty" id="cEmpty" hidden>这片水域没捞到东西。</p>
+        <div class="more-wrap"><button class="btn btn-ghost" id="cMore" type="button" hidden>再往下潜一点</button></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="container footer-inner">
+    <p class="footer-brand">蓝色大肥鱼 · TIDAL ARCHIVE</p>
+    <p class="footer-quote">收好每一张有趣的图。</p>
+    <p class="footer-note">非官方同人整理 · 图片版权归原作者所有</p>
+  </div>
+</footer>
+
+<div class="modal" id="modal" hidden role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+  <div class="modal-scrim" data-close></div>
+  <div class="modal-card">
+    <button class="modal-close" type="button" data-close aria-label="关闭">×</button>
+    <div class="modal-art"><img id="modalImg" alt=""></div>
+    <div class="modal-info">
+      <div class="modal-meta">
+        <span class="modal-char" id="modalChar"></span><span class="sep">/</span>
+        <span id="modalKind"></span><span class="sep">/</span>
+        <span id="modalDate"></span>
+      </div>
+      <h3 id="modalTitle"></h3>
+      <p class="modal-desc" id="modalDesc"></p>
+      <blockquote class="modal-commentary" id="modalCommentary" hidden><span>大肥鱼说</span><p></p></blockquote>
+      <div class="modal-tags" id="modalTags"></div>
+      <div class="modal-actions">
+        <a class="btn btn-primary" id="modalOriginal" target="_blank" rel="noopener">下载原图</a>
+        <a class="btn btn-ghost" id="modalPage" target="_blank" rel="noopener">去作品页</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="../../starter/data.js"></script>
+<script src="./characters.js"></script>
+</body>
+</html>

@@ -65,9 +65,17 @@
       try { localStorage.setItem('tidal-theme', theme); } catch (e) { /* storage may be unavailable */ }
     }
   }
+  function playTide() {
+    var wipe = $('#tideWipe');
+    if (!wipe || (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches)) return;
+    wipe.classList.remove('run');
+    void wipe.offsetWidth;
+    wipe.classList.add('run');
+  }
   applyTheme(root.getAttribute('data-theme') === 'night' ? 'night' : 'day', false);
   $('#themeToggle').addEventListener('click', function () {
     applyTheme(root.getAttribute('data-theme') === 'night' ? 'day' : 'night', true);
+    playTide();
   });
 
   /* ---------- tokens ---------- */

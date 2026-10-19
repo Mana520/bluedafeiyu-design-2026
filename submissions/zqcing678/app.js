@@ -81,10 +81,18 @@
     var night = root.getAttribute('data-theme') === 'night';
     stamp.textContent = (night ? 'HIGH TIDE' : 'LOW TIDE') + ' · ' + total + ' ENTRIES';
   }
+  function playTide() {
+    var wipe = $('#tideWipe');
+    if (!wipe || (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches)) return;
+    wipe.classList.remove('run');
+    void wipe.offsetWidth;
+    wipe.classList.add('run');
+  }
   applyTheme(root.getAttribute('data-theme') === 'night' ? 'night' : 'day', false);
   $('#themeToggle').addEventListener('click', function () {
     var next = root.getAttribute('data-theme') === 'night' ? 'day' : 'night';
     applyTheme(next, true);
+    playTide();
   });
 
   /* ---------- tokens ---------- */

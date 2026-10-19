@@ -343,6 +343,22 @@ html[data-theme="day"] .letter-note::before{content:"";position:absolute;top:-9p
   box-shadow:0 0 14px rgba(255,207,122,.85);animation:coinFly .95s var(--ease) forwards}
 @keyframes coinFly{to{translate:0 -64px;opacity:0;scale:1.5}}
 
+/* tide wash when switching between low & high tide */
+.tide-wipe{position:fixed;inset:0;z-index:65;pointer-events:none;opacity:0;
+  background:linear-gradient(180deg,color-mix(in srgb,var(--bright) 26%,transparent),color-mix(in srgb,var(--brand) 30%,transparent));
+  -webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 900' preserveAspectRatio='none'%3E%3Cpath d='M0,250 C220,150 430,320 720,250 C1010,180 1210,330 1440,240 L1440,900 L0,900 Z' fill='%23fff'/%3E%3C/svg%3E");
+  mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 900' preserveAspectRatio='none'%3E%3Cpath d='M0,250 C220,150 430,320 720,250 C1010,180 1210,330 1440,240 L1440,900 L0,900 Z' fill='%23fff'/%3E%3C/svg%3E");
+  -webkit-mask-size:100% 200%;mask-size:100% 200%;
+  -webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;
+  -webkit-mask-position:0 0%;mask-position:0 0%}
+.tide-wipe.run{animation:tideWash 1.25s cubic-bezier(.22,1,.36,1) both}
+@keyframes tideWash{
+  0%{opacity:0;-webkit-mask-position:0 0%;mask-position:0 0%}
+  14%{opacity:.55}
+  82%{opacity:.32}
+  100%{opacity:0;-webkit-mask-position:0 100%;mask-position:0 100%}
+}
+
 @media (max-width:1080px){
   .hero-inner{grid-template-columns:1fr;gap:10px}
   .hero-art{display:none}

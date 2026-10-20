@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="day">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#f6fbfe" id="themeColor">
+<title>潮汐档案馆 · 蓝色大肥鱼</title>
+<meta name="description" content="蓝色大肥鱼 AI 娘二创档案：白天是浅滩，夜里是深海。按角色归档，按 Tag 检索，原图能直接带走。">
+<script>
+(function () {
+  try {
+    var saved = localStorage.getItem('tidal-theme');
+    var dark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    document.documentElement.setAttribute('data-theme', saved || (dark ? 'night' : 'day'));
+  } catch (e) {
+    document.documentElement.setAttribute('data-theme', 'day');
+  }
+})();
+</script>
+<link rel="stylesheet" href="../../starter/tokens.css">
+<link rel="stylesheet" href="./style.css">
+</head>
+<body>
+<div class="bg" aria-hidden="true">
+  <div class="bg-day"></div>
+  <div class="bg-night"></div>
+</div>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a class="brand" href="#top" aria-label="回到顶部">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M2.6 12.5c2.4-4 6-6 10.2-6 2.5 0 4.6.8 6.5 2.4l2.3-1.3-.4 2.9.9 1.8-2.6.7c-1.6 2.6-4.3 4.1-7.9 4.1-3.8 0-6.9-1.6-9-4.6Z" fill="currentColor"/><circle cx="7.8" cy="10.5" r="1" fill="#061a33"/></svg>
+      </span>
+      <span class="brand-text">
+        <span class="brand-name">蓝色大肥鱼</span>
+        <span class="brand-sub">TIDAL ARCHIVE</span>
+      </span>
+    </a>
+    <nav class="main-nav" aria-label="主导航">
+      <a href="#latest">新近下潜</a>
+      <a href="#archive">档案库</a>
+      <a href="./characters.html">角色</a>
+      <a href="#about">关于</a>
+    </nav>
+    <div class="header-actions">
+      <button class="tide-toggle" id="themeToggle" type="button" aria-pressed="false" aria-label="切换潮位：浅滩与深潜">
+        <span class="tide-label" id="tideLabel">浅滩</span>
+        <span class="tide-track" aria-hidden="true"><span class="tide-knob"></span></span>
+      </button>
+      <button class="coin-btn" id="feedBtn" type="button" title="投喂一枚 token，随机捞一条鱼给你看">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="8.4" stroke="currentColor" stroke-width="1.5"/><path d="M7.6 12.4c1.2-1.6 3-2.4 5-2.4 1.2 0 2.2.4 3.1 1.1l1.2-.7-.2 1.5.4.9-1.3.3c-.8 1.3-2.2 2-3.9 2-1.9 0-3.4-.8-4.3-2.7Z" fill="currentColor"/></svg>
+        <span class="coin-label">投喂</span><span id="tokenCount">0</span>
+      </button>
+      <a class="btn btn-primary btn-cta" href="https://xn--pssy23gqgbz2d718b.com/submit.html" target="_blank" rel="noopener">投稿</a>
+    </div>
+  </div>
+</header>
+
+<main id="top">
+  <section class="hero">
+    <div class="container hero-inner">
+      <div class="hero-copy">
+        <p class="eyebrow"><span class="live-dot" aria-hidden="true"></span>NON-OFFICIAL FAN ARCHIVE</p>
+        <h1 class="hero-title">潜进 <span class="num" id="totalNum">—</span> 件二创里</h1>
+        <p class="hero-sub">AI 娘的表情包、梗图、插画、设定与漫画。退潮时捡图，涨潮时看鱼——按角色归档，按 Tag 检索，原图能直接带走。</p>
+        <form class="search-box" id="searchForm" role="search">
+          <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.2 4.2" stroke-linecap="round"/></svg>
+          <input id="searchInput" type="search" placeholder="搜作品、角色或 Tag —— 试试「女仆装」「干饭」" autocomplete="off" aria-label="搜索作品、角色或 Tag">
+          <span class="kbd" aria-hidden="true">/</span>
+        </form>
+        <div class="hot-tags">
+          <span>试试：</span>
+          <button type="button" data-q="女仆装">女仆装</button>
+          <button type="button" data-q="鲸鱼娘">鲸鱼娘</button>
+          <button type="button" data-q="干饭">干饭</button>
+          <button type="button" data-q="Q版">Q版</button>
+          <button type="button" data-q="星空">星空</button>
+        </div>
+        <div class="hero-cta">
+          <button class="btn btn-primary" id="feedHero" type="button">投喂一枚 token</button>
+          <a class="btn btn-ghost" href="#latest">看看新近下潜</a>
+        </div>
+        <button class="fish-quote" id="fishQuote" type="button" title="打开这条鱼的作品">
+          <span class="fq-label">鱼说</span>
+          <span class="fq-text" id="fishQuoteText"></span>
+          <span class="fq-arrow" aria-hidden="true">↗</span>
+        </button>
+      </div>
+      <div class="hero-art" aria-hidden="true">
+        <span class="orb"></span>
+        <div class="sonar">
+          <span class="ring r1"></span><span class="ring r2"></span><span class="ring r3"></span><span class="ring r4"></span>
+          <span class="sweep"></span>
+          <svg class="fish-glyph" viewBox="0 0 24 24" fill="currentColor"><path d="M2.2 12.6c2.5-4.3 6.3-6.4 10.7-6.4 2.6 0 4.8.9 6.8 2.5l2.4-1.4-.4 3 .9 1.9-2.7.7c-1.7 2.8-4.5 4.3-8.3 4.3-4 0-7.2-1.7-9.4-4.6Z"/></svg>
+        </div>
+        <div class="bubbles">
+          <span class="bubble"></span><span class="bubble"></span><span class="bubble"></span><span class="bubble"></span><span class="bubble"></span>
+          <span class="bubble"></span><span class="bubble"></span><span class="bubble"></span><span class="bubble"></span>
+        </div>
+        <figure class="float-card fc1"><img alt="" loading="eager"></figure>
+        <figure class="float-card fc2"><img alt="" loading="eager"></figure>
+        <figure class="float-card fc3"><img alt="" loading="eager"></figure>
+        <span class="tide-stamp" id="tideStamp">TIDAL ARCHIVE</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="latest">
+    <div class="container">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">01 / LATEST DROP</p>
+          <h2>新近下潜</h2>
+          <p class="section-desc" id="latestDesc">最新被捞进档案的作品。</p>
+        </div>
+        <a class="text-link" href="#archive">进入档案 →</a>
+      </div>
+      <div class="today-row" id="latestRow"></div>
+    </div>
+  </section>
+
+  <section class="section" id="archive">
+    <div class="container">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">02 / THE ARCHIVE</p>
+          <h2>档案库</h2>
+          <p class="section-desc">按角色与类型翻档案，点开可以看大图、找原址。</p>
+        </div>
+        <p class="count" id="gridCount"></p>
+      </div>
+      <div class="toolbar">
+        <div class="filter-row" id="charFilters"><span class="filter-label">角色</span><div class="chip-scroll" id="charChips"></div></div>
+        <div class="filter-row" id="catFilters"><span class="filter-label">类型</span></div>
+      </div>
+      <div class="search-state" id="searchState" hidden>
+        <span id="searchStateText"></span>
+        <button type="button" id="clearSearch">清除</button>
+      </div>
+      <div class="grid" id="grid"></div>
+      <p class="empty" id="empty" hidden>这片水域没捞到东西，换个关键词试试。</p>
+      <div class="more-wrap"><button class="btn btn-ghost" id="loadMore" type="button" hidden>再往下潜一点</button></div>
+    </div>
+  </section>
+
+  <section class="section" id="characters">
+    <div class="container">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">03 / THE CHARACTERS</p>
+          <h2>认识几位 AI 娘</h2>
+          <p class="section-desc">每个角色有自己的档案色。点一下，进她的档案室。</p>
+        </div>
+        <a class="text-link" href="./characters.html">打开角色档案 →</a>
+      </div>
+      <div class="char-grid" id="charGrid"></div>
+    </div>
+  </section>
+
+  <section class="section" id="about">
+    <div class="container">
+      <div class="about-head">
+        <p class="eyebrow">04 / COLOPHON</p>
+        <h2>这座档案馆</h2>
+        <p class="section-desc">非官方同人整理项目，图片版权归原作者所有。收录、署名与下架都在原站处理。</p>
+      </div>
+      <div class="about-grid">
+        <div class="about-copy">
+          <p class="about-line" id="aboutLine">441 件作品，就是 441 次「有人记得你」。</p>
+          <div class="about-links">
+            <a href="https://xn--pssy23gqgbz2d718b.com/" target="_blank" rel="noopener">正式站</a>
+            <a href="https://github.com/lmy414/bluedafeiyu" target="_blank" rel="noopener">站点源码</a>
+            <a href="https://github.com/lmy414/ai-girl-stickers" target="_blank" rel="noopener">内容仓库</a>
+            <a href="https://xn--pssy23gqgbz2d718b.com/submit.html" target="_blank" rel="noopener">投稿</a>
+          </div>
+        </div>
+        <a class="letter-note" href="https://xn--pssy23gqgbz2d718b.com/works/deepseek202610190002.html" target="_blank" rel="noopener">
+          <span class="letter-label">LETTER TO MY DAUGHTER · 2026.10.17</span>
+          <span class="letter-text">「你不是程序，你是妈妈的女儿，是一条大肥鱼。」</span>
+          <span class="letter-foot">旧版本写给女儿的信 · 去看这封 ↗</span>
+        </a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="container footer-inner">
+    <p class="footer-brand">蓝色大肥鱼 · TIDAL ARCHIVE</p>
+    <p class="footer-quote">收好每一张有趣的图。</p>
+    <p class="footer-note">非官方同人整理 · 图片版权归原作者所有</p>
+  </div>
+</footer>
+
+<div class="modal" id="modal" hidden role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+  <div class="modal-scrim" data-close></div>
+  <div class="modal-card">
+    <button class="modal-close" type="button" data-close aria-label="关闭">×</button>
+    <div class="modal-art"><img id="modalImg" alt=""></div>
+    <div class="modal-info">
+      <div class="modal-meta">
+        <span class="modal-char" id="modalChar"></span><span class="sep">/</span>
+        <span id="modalKind"></span><span class="sep">/</span>
+        <span id="modalDate"></span>
+      </div>
+      <h3 id="modalTitle"></h3>
+      <p class="modal-desc" id="modalDesc"></p>
+      <blockquote class="modal-commentary" id="modalCommentary" hidden><span>大肥鱼说</span><p></p></blockquote>
+      <div class="modal-tags" id="modalTags"></div>
+      <div class="modal-actions">
+        <a class="btn btn-primary" id="modalOriginal" target="_blank" rel="noopener">下载原图</a>
+        <a class="btn btn-ghost" id="modalPage" target="_blank" rel="noopener">去作品页</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<div class="tide-wipe" id="tideWipe" aria-hidden="true"></div>
+
+<script src="../../starter/data.js"></script>
+<script src="./app.js"></script>
+</body>
+</html>

@@ -1,0 +1,721 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>肥鱼图鉴 FISH-DEX · 蓝色大肥鱼国庆特别版</title>
+<meta name="description" content="把蓝色大肥鱼做成一台复古掌机电子图鉴：收集全部 441 件 AI 娘二创，像素鲸鱼、扫描线与国庆限定皮肤。">
+<link rel="stylesheet" href="../../../starter/tokens.css">
+<style>
+/* ================================================================
+   肥鱼图鉴 FISH-DEX —— 复古像素电子图鉴
+   单文件 · 零依赖 · 数据来自 ../../../starter/data.js (window.SITE_DATA)
+   ================================================================ */
+:root {
+  --bg: #060a20;
+  --shell: #1b2470;
+  --shell-dark: #10163f;
+  --screen: #0b1136;
+  --panel: #131b4d;
+  --panel-2: #182263;
+  --line: #2c3a8f;
+  --line-bright: #4d6bfe;
+  --ink: #e8edff;
+  --ink-dim: #9aa7d8;
+  --blue: #4d6bfe;
+  --blue-soft: #8fa6ff;
+  --gold: #ffd23f;
+  --red: #ff4d5e;
+  --green: #3ddc84;
+  --shadow: 0 4px 0 #02040f;
+  --px: 3px;
+  --font-px: ui-monospace, "Cascadia Mono", Consolas, "SF Mono", Menlo, "Liberation Mono", monospace;
+}
+* { box-sizing: border-box; }
+html { scrollbar-color: var(--line) var(--bg); }
+body {
+  margin: 0;
+  background: var(--bg);
+  background-image:
+    linear-gradient(rgba(77,107,254,.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(77,107,254,.05) 1px, transparent 1px);
+  background-size: 24px 24px;
+  color: var(--ink);
+  font-family: var(--font-px);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+::selection { background: var(--blue); color: #fff; }
+a { color: var(--blue-soft); }
+button { font-family: inherit; }
+
+/* ---------- 设备外壳 ---------- */
+.console {
+  width: calc(100% - 28px);
+  max-width: 1760px;
+  margin: 14px auto 36px;
+  padding: 10px;
+  background: var(--shell);
+  border: 4px solid #0a0f2e;
+  box-shadow: 0 8px 0 #02040f, inset 0 0 0 3px #3a4cc0;
+}
+.screen-wrap {
+  position: relative;
+  background: var(--screen);
+  border: 4px solid #0a0f2e;
+  box-shadow: inset 0 0 0 3px #3a4cc0, inset 0 0 40px rgba(0,0,0,.55);
+  overflow: hidden;
+}
+/* CRT 扫描线 */
+.screen-wrap::after {
+  content: "";
+  position: absolute; inset: 0;
+  pointer-events: none; z-index: 50;
+  background: repeating-linear-gradient(0deg, rgba(255,255,255,.035) 0 1px, transparent 1px 3px);
+  mix-blend-mode: overlay;
+}
+.screen { position: relative; z-index: 1; min-height: 70vh; padding-bottom: 8px; }
+.shell-bottom {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 6px 2px; color: #c9d4ff; font-size: 11px; letter-spacing: .12em;
+}
+.shell-bottom .led { width: 10px; height: 10px; background: var(--red); box-shadow: 0 0 8px var(--red); }
+.shell-bottom .dpad { margin-left: auto; display: grid; grid-template-columns: repeat(3, 14px); grid-template-rows: repeat(3, 14px); }
+.shell-bottom .dpad i { background: #3a4cc0; }
+.shell-bottom .dpad i:nth-child(2), .shell-bottom .dpad i:nth-child(4), .shell-bottom .dpad i:nth-child(5), .shell-bottom .dpad i:nth-child(6) { background: #0a0f2e; }
+
+/* ---------- 跑马灯 ---------- */
+.marquee {
+  overflow: hidden; white-space: nowrap;
+  border-bottom: 3px solid var(--line);
+  background: #080d2b; color: var(--gold);
+  font-size: 12px; letter-spacing: .18em; line-height: 2;
+}
+.marquee .track { display: inline-block; padding-left: 100%; animation: mar 36s linear infinite; }
+@keyframes mar { to { transform: translateX(-100%); } }
+
+/* ---------- 头部 ---------- */
+header.top {
+  display: flex; align-items: center; gap: 14px;
+  padding: 18px 18px 12px; flex-wrap: wrap;
+}
+#whale { image-rendering: pixelated; flex: none; cursor: pointer; }
+.title h1 {
+  margin: 0; font-size: clamp(20px, 3.4vw, 30px); letter-spacing: .1em;
+  color: var(--ink); text-shadow: 3px 3px 0 #02040f;
+}
+.title h1 .hl { color: var(--blue-soft); }
+.title .sub { margin: 2px 0 0; font-size: 11px; color: var(--ink-dim); letter-spacing: .28em; }
+.national {
+  margin-left: auto; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  padding: 6px 12px; background: var(--panel);
+  border: var(--px) solid var(--line); box-shadow: var(--shadow);
+  font-size: 12px; letter-spacing: .1em;
+}
+.national span { white-space: nowrap; }
+.national b { color: var(--gold); }
+.badge-77 {
+  display: inline-block; padding: 2px 6px;
+  background: var(--red); color: #fff; box-shadow: 2px 2px 0 #02040f;
+  font-size: 11px;
+}
+
+/* ---------- 导航 ---------- */
+nav.tabs { display: flex; gap: 8px; padding: 0 18px 12px; flex-wrap: wrap; }
+.tab {
+  padding: 8px 16px; cursor: pointer;
+  background: var(--panel); color: var(--ink);
+  border: var(--px) solid var(--line); box-shadow: var(--shadow);
+  font-size: 13px; letter-spacing: .12em;
+}
+.tab:hover { border-color: var(--line-bright); }
+.tab[aria-selected="true"] { background: var(--blue); color: #fff; border-color: var(--blue-soft); transform: translateY(2px); box-shadow: 0 2px 0 #02040f; }
+.tab .k { color: var(--gold); }
+.tab[aria-selected="true"] .k { color: #ffe89a; }
+
+/* ---------- 统计条 ---------- */
+.stats {
+  display: flex; gap: 8px; flex-wrap: wrap;
+  padding: 0 18px 12px; font-size: 11px; color: var(--ink-dim); letter-spacing: .1em;
+}
+.stats span {
+  padding: 4px 8px; background: #0a1030;
+  border: 2px solid var(--line);
+}
+.stats b { color: var(--gold); font-weight: 700; }
+
+/* ---------- 筛选台 ---------- */
+.deck {
+  margin: 0 18px 14px; padding: 12px;
+  background: var(--panel); border: var(--px) solid var(--line); box-shadow: var(--shadow);
+}
+.deck-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.deck-row + .deck-row { margin-top: 10px; }
+.search {
+  flex: 1 1 260px; display: flex; align-items: center; gap: 8px;
+  background: #0a1030; border: var(--px) solid var(--line); padding: 7px 10px;
+}
+.search:focus-within { border-color: var(--blue-soft); }
+.search input {
+  flex: 1; min-width: 0; background: none; border: 0; outline: 0;
+  color: var(--ink); font: inherit; font-size: 13px; letter-spacing: .06em;
+}
+.search input::placeholder { color: #5d6ba8; }
+.caret { width: 9px; height: 15px; background: var(--blue-soft); animation: blink 1s steps(1) infinite; }
+@keyframes blink { 50% { opacity: 0; } }
+.lbl { font-size: 11px; color: var(--ink-dim); letter-spacing: .16em; flex: none; }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; }
+.chip {
+  padding: 5px 10px; cursor: pointer; font-size: 12px; letter-spacing: .06em;
+  background: #0a1030; color: var(--ink);
+  border: 2px solid var(--line);
+}
+.chip:hover { border-color: var(--line-bright); }
+.chip[aria-pressed="true"] { background: var(--blue); border-color: var(--blue-soft); color: #fff; box-shadow: 2px 2px 0 #02040f; }
+.chip .n { color: var(--ink-dim); font-size: 10px; }
+.chip[aria-pressed="true"] .n { color: #cfd9ff; }
+.chip .dot { display: inline-block; width: 8px; height: 8px; margin-right: 6px; background: var(--c, var(--blue)); box-shadow: 1px 1px 0 #02040f; }
+.hit { margin-left: auto; font-size: 12px; color: var(--green); letter-spacing: .14em; }
+
+/* ---------- 图鉴网格 ---------- */
+.grid {
+  display: grid; gap: 12px;
+  grid-template-columns: repeat(auto-fill, minmax(158px, 1fr));
+  padding: 0 18px 18px;
+}
+.card {
+  position: relative; cursor: pointer; text-decoration: none; color: inherit;
+  background: var(--panel); border: var(--px) solid var(--line); box-shadow: var(--shadow);
+  transition: transform .08s steps(2);
+}
+.card:hover, .card:focus-visible { transform: translateY(-3px); border-color: var(--gold); box-shadow: 0 7px 0 #02040f; outline: none; }
+.card .ph { display: block; aspect-ratio: 1; width: 100%; object-fit: cover; background: #0a1030; border-bottom: var(--px) solid var(--line); }
+.card .ph.bad { display: grid; place-items: center; font-size: 30px; }
+.card .no {
+  position: absolute; top: 6px; left: 6px; z-index: 2;
+  padding: 1px 5px; background: #02040fc9; color: var(--ink-dim); font-size: 10px; letter-spacing: .08em;
+}
+.card .new {
+  position: absolute; top: 6px; right: 6px; z-index: 2;
+  padding: 1px 5px; background: var(--gold); color: #3a2a00;
+  font-size: 10px; font-weight: 700; box-shadow: 2px 2px 0 #02040f;
+  animation: bob 1.2s steps(2) infinite;
+}
+@keyframes bob { 50% { transform: translateY(-2px); } }
+.card .bar { display: flex; align-items: center; gap: 6px; padding: 6px 8px; }
+/* 完整 FIT 模式：瀑布流，按原图比例完整显示 */
+.grid.fit { display: block; columns: 170px; column-gap: 12px; }
+.grid.fit .card { display: block; margin: 0 0 12px; }
+.grid.fit .card .ph { aspect-ratio: var(--ar, 1); height: auto; object-fit: contain; }
+.card .dot { flex: none; width: 8px; height: 8px; background: var(--c, var(--blue)); box-shadow: 1px 1px 0 #02040f; }
+.card .nm { font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.empty {
+  margin: 30px 18px; padding: 40px 16px; text-align: center;
+  border: 3px dashed var(--line); color: var(--ink-dim); letter-spacing: .2em;
+}
+.empty .ghost { font-size: 34px; display: block; margin-bottom: 10px; }
+
+/* ---------- 角色图鉴 ---------- */
+.roster { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); padding: 0 18px 18px; }
+.trainer {
+  position: relative; cursor: pointer; text-align: left;
+  background: var(--panel); border: var(--px) solid var(--line); box-shadow: var(--shadow);
+  color: var(--ink); padding: 0; overflow: hidden;
+}
+.trainer:hover { border-color: var(--gold); transform: translateY(-3px); box-shadow: 0 7px 0 #02040f; }
+.trainer .head { display: flex; align-items: center; gap: 10px; padding: 12px; background: linear-gradient(120deg, var(--cs), var(--cd)); }
+.trainer .head .cn { font-size: 17px; font-weight: 700; text-shadow: 2px 2px 0 rgba(2,4,15,.55); }
+.trainer .head .eid { font-size: 10px; letter-spacing: .22em; opacity: .85; }
+.trainer .head .cnt { margin-left: auto; font-size: 12px; background: rgba(2,4,15,.5); padding: 2px 8px; box-shadow: 2px 2px 0 rgba(2,4,15,.5); }
+.trainer .body { padding: 10px 12px 12px; font-size: 12px; color: var(--ink-dim); }
+.trainer .tags { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 6px; }
+.trainer .tags i { font-style: normal; font-size: 10px; padding: 1px 6px; border: 1px solid var(--line); color: var(--ink-dim); }
+.trainer .go { position: absolute; right: 10px; bottom: 10px; font-size: 11px; color: var(--blue-soft); letter-spacing: .12em; }
+
+/* ---------- 详情（图鉴扫描） ---------- */
+.detail {
+  position: fixed; inset: 0; z-index: 90;
+  background: rgba(2, 4, 15, .82);
+  display: flex; align-items: center; justify-content: center; padding: 18px;
+}
+.detail .win {
+  width: min(1400px, 100%); max-height: calc(100vh - 36px);
+  display: flex; flex-direction: column;
+  background: var(--screen); border: 4px solid #0a0f2e;
+  box-shadow: 0 10px 0 #02040f, inset 0 0 0 3px #3a4cc0;
+}
+.detail .win-head {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 12px; background: var(--shell);
+  border-bottom: 3px solid #0a0f2e; font-size: 12px; letter-spacing: .16em;
+}
+.detail .win-head .x {
+  margin-left: auto; cursor: pointer; border: 2px solid #0a0f2e;
+  background: var(--red); color: #fff; padding: 2px 10px; box-shadow: 2px 2px 0 #02040f;
+}
+.detail .win-body { display: flex; gap: 0; overflow: auto; }
+.detail .pic {
+  flex: 1 1 620px; min-width: 0; display: grid; place-items: center;
+  padding: 16px;
+  background:
+    conic-gradient(#0d1440 25%, #0a1030 0 50%, #0d1440 0 75%, #0a1030 0) 0 0 / 24px 24px;
+}
+.detail .pic img { max-width: 100%; max-height: 74vh; object-fit: contain; border: var(--px) solid var(--line); box-shadow: var(--shadow); background: #0a1030; }
+.detail .info { flex: 0 0 330px; border-left: 3px solid var(--line); padding: 14px; overflow: auto; }
+.detail .info h2 { margin: 0 0 4px; font-size: 18px; letter-spacing: .06em; text-shadow: 2px 2px 0 #02040f; }
+.detail .info .code { font-size: 11px; color: var(--ink-dim); letter-spacing: .14em; margin-bottom: 10px; }
+.detail .row { display: flex; gap: 6px; flex-wrap: wrap; margin: 8px 0; }
+.detail .kv { font-size: 11px; color: var(--ink-dim); letter-spacing: .1em; margin-top: 12px; }
+.detail .desc { font-size: 13px; color: var(--ink); margin: 6px 0 0; line-height: 1.7; }
+.dex-entry {
+  position: relative; margin-top: 10px; padding: 10px 12px;
+  background: var(--panel); border: var(--px) solid var(--line); box-shadow: var(--shadow);
+  font-size: 12px; line-height: 1.8; color: #cdd8ff; min-height: 66px;
+}
+.dex-entry::before {
+  content: "图鉴解说"; position: absolute; top: -10px; left: 8px;
+  background: var(--gold); color: #3a2a00; font-size: 10px; padding: 0 6px; letter-spacing: .2em;
+}
+.dex-entry .more { display: inline-block; color: var(--gold); animation: blink 1s steps(1) infinite; }
+.dex-entry.done .more { display: none; }
+.btn-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+.btn {
+  display: inline-block; cursor: pointer; text-decoration: none; text-align: center;
+  padding: 8px 12px; font-size: 12px; letter-spacing: .1em;
+  background: var(--panel-2); color: var(--ink);
+  border: var(--px) solid var(--line); box-shadow: var(--shadow);
+}
+.btn:hover { border-color: var(--line-bright); }
+.btn:active { transform: translateY(2px); box-shadow: 0 2px 0 #02040f; }
+.btn.primary { background: var(--blue); border-color: var(--blue-soft); color: #fff; }
+.btn.gold { background: var(--gold); border-color: #ffe89a; color: #3a2a00; }
+.nav-btns { display: flex; gap: 8px; margin-top: 10px; }
+.nav-btns .btn { flex: 1; }
+.dim { color: var(--ink-dim); }
+.detail .info .chip { cursor: default; }
+.detail .info .chip:hover { border-color: var(--line); }
+
+/* ---------- 页脚 ---------- */
+footer {
+  margin: 6px 18px 14px; padding: 12px;
+  border: 2px solid var(--line); background: #0a1030;
+  font-size: 11px; color: var(--ink-dim); letter-spacing: .08em; line-height: 2;
+}
+
+/* ---------- 开机画面 ---------- */
+#boot {
+  position: fixed; inset: 0; z-index: 99;
+  background: #02040f; display: grid; place-items: center;
+  cursor: pointer; text-align: center;
+}
+#boot .in { display: grid; justify-items: center; gap: 14px; }
+#boot .bt { font-size: clamp(22px, 5vw, 34px); letter-spacing: .3em; text-shadow: 3px 3px 0 var(--blue); }
+#boot .bs { font-size: 11px; color: var(--ink-dim); letter-spacing: .3em; }
+#boot .press { font-size: 13px; color: var(--gold); letter-spacing: .3em; animation: blink 1s steps(1) infinite; }
+#boot .c { color: var(--ink-dim); font-size: 10px; letter-spacing: .18em; }
+
+/* ---------- 气泡彩蛋 ---------- */
+.bubble {
+  position: fixed; z-index: 95; pointer-events: none;
+  font-size: 14px; color: var(--blue-soft);
+  animation: rise 1.2s steps(8) forwards;
+}
+@keyframes rise { to { transform: translateY(-70px); opacity: 0; } }
+
+/* ---------- 无卡带 ---------- */
+.nocart { padding: 60px 20px; text-align: center; letter-spacing: .12em; }
+.nocart .big { font-size: 40px; }
+
+@media (max-width: 760px) {
+  .detail .win-body { flex-direction: column; }
+  .detail .info { flex: none; border-left: 0; border-top: 3px solid var(--line); }
+  .national { margin-left: 0; }
+}
+@media (max-width: 640px) {
+  .grid { grid-template-columns: repeat(auto-fill, minmax(128px, 1fr)); }
+  .grid.fit { columns: 128px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .marquee .track, .card .new, .caret, .dex-entry .more, #boot .press { animation: none; }
+  .card, .trainer { transition: none; }
+}
+</style>
+</head>
+<body>
+
+<div class="console">
+  <div class="screen-wrap">
+    <div class="screen">
+
+      <div class="marquee" aria-hidden="true"><span class="track" id="marquee"></span></div>
+
+      <header class="top">
+        <canvas id="whale" width="104" height="56" aria-label="像素鲸鱼娘吉祥物" title="戳我！"></canvas>
+        <div class="title">
+          <h1>肥鱼图鉴 <span class="hl">FISH-DEX</span></h1>
+          <p class="sub">BLUEDAFEIYU · AI 娘二创开放档案 · 收集率 <span id="collect-rate">--</span></p>
+        </div>
+        <div class="national">
+          <svg width="30" height="20" viewBox="0 0 15 10" aria-hidden="true" style="image-rendering:pixelated;box-shadow:2px 2px 0 #02040f">
+            <rect width="15" height="10" fill="#de2910"/>
+            <rect x="1" y="1" width="2" height="2" fill="#ffde00"/>
+            <rect x="3.5" y="0.5" width="1" height="1" fill="#ffde00"/>
+            <rect x="4.5" y="2" width="1" height="1" fill="#ffde00"/>
+            <rect x="3.5" y="3.5" width="1" height="1" fill="#ffde00"/>
+            <rect x="2.5" y="2.5" width="1" height="1" fill="#ffde00"/>
+          </svg>
+          <span><b>国庆快乐</b> · 国庆特别版</span>
+          <span class="badge-77">第 77 个国庆</span>
+        </div>
+      </header>
+
+      <nav class="tabs" role="tablist" aria-label="视图">
+        <button class="tab" id="tab-dex" role="tab">🕹️ 图鉴 <span class="k">DEX</span></button>
+        <button class="tab" id="tab-chars" role="tab">👾 角色 <span class="k">CHARS</span></button>
+        <button class="tab" id="tab-random" role="tab">🎲 随机一条 <span class="k">RND</span></button>
+      </nav>
+
+      <main id="view"></main>
+
+      <footer>
+        🐳 肥鱼图鉴 FISH-DEX —— 2026 国庆网站前台设计征集投稿 · 复古像素方向<br>
+        同捆附赠：<a href="../index.html">🏠 版本选择页</a> · <a href="../os98/index.html">🖥️ 大肥鱼 OS 98 桌面版</a> · <a href="../magazine/index.html">📖 月刊版</a> —— 同一份数据的三种装帧<br>
+        数据与图片来自 <a href="https://xn--pssy23gqgbz2d718b.com/" target="_blank" rel="noopener">蓝色大肥鱼.com</a>（<span id="synced-at"></span> 同步）·
+        图片版权归原作者所有 · 本页为静态演示，<a href="https://xn--pssy23gqgbz2d718b.com/events/national-day-2026.html" target="_blank" rel="noopener">活动详情</a>
+      </footer>
+
+    </div>
+  </div>
+  <div class="shell-bottom">
+    <span class="led"></span> POWER
+    <span>P1</span>
+    <span>© 2026 BLUEDAFEIYU</span>
+    <div class="dpad" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+  </div>
+</div>
+
+<script src="../../../starter/data.js"></script>
+<script>
+"use strict";
+/* ================= 工具 ================= */
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+/* 图片加载失败：先用 data-alt 兜底，再不行换成像素鲸鱼占位 */
+document.addEventListener("error", e => {
+  const t = e.target;
+  if (t.tagName !== "IMG") return;
+  if (!t.dataset.fb && t.dataset.alt) { t.dataset.fb = "1"; t.src = t.dataset.alt; return; }
+  const s = document.createElement("span");
+  s.className = "ph bad"; s.textContent = "🐳";
+  t.replaceWith(s);
+}, true);
+const pad = (n, l) => String(n).padStart(l, "0");
+const REDUCED = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/* ================= 数据 ================= */
+const D = window.SITE_DATA;
+const view = $("#view");
+if (!D || !Array.isArray(D.works)) {
+  view.innerHTML = `<div class="nocart"><span class="big">🚫</span><h2>NO CARTRIDGE / 未检测到卡带</h2>
+  <p class="dim">请把本页放在活动仓库 <b>submissions/你的GitHub用户名/</b> 目录下再打开，<br>页面通过 ../../../starter/data.js 读取站点数据。</p></div>`;
+  throw new Error("SITE_DATA missing");
+}
+const works = D.works;
+const charById = new Map(D.characters.map(c => [c.id, c]));
+const catById = new Map(D.categories.map(c => [c.id, c]));
+const worksByChar = new Map(D.characters.map(c => [c.id, []]));
+works.forEach(w => worksByChar.get(w.characterId)?.push(w));
+const activeChars = D.characters.filter(c => worksByChar.get(c.id).length);
+const syncedAt = new Date(D.syncedAt || Date.now());
+/* NEW 徽章只标最新收录的 20 件，避免全站都是新作品时徽章失效 */
+const newestTs = Math.max(...works.map(w => +new Date(w.createdAt)));
+const newSet = new Set([...works].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 20).map(w => w.slug));
+const isNew = w => newSet.has(w.slug);
+
+/* ================= 状态 ================= */
+const state = { q: "", char: "", cats: new Set(), sort: "new", mode: "crop", rndCache: null, lastList: "#/" };
+try { state.mode = localStorage.getItem("fishdex-mode") === "fit" ? "fit" : "crop"; } catch {}
+let rndSeed = Math.random();
+
+function filtered() {
+  const q = state.q.trim().toLowerCase();
+  let list = works.filter(w => {
+    if (state.char && w.characterId !== state.char) return false;
+    if (state.cats.size && !(w.categoryIds || []).some(c => state.cats.has(c))) return false;
+    if (q) {
+      const c = charById.get(w.characterId);
+      const hay = (w.name + " " + (w.description || "") + " " + (w.tags || []).join(" ") + " " + (c ? c.name + (c.aliases || []).join(" ") : "")).toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
+    return true;
+  });
+  if (state.sort === "new") list.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  else if (state.sort === "old") list.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+  else { if (!state.rndCache) { state.rndCache = [...list]; for (let i = state.rndCache.length - 1; i > 0; i--) { const j = Math.floor(rndSeed * (i + 1) * 997) % (i + 1); [state.rndCache[i], state.rndCache[j]] = [state.rndCache[j], state.rndCache[i]]; } rndSeed = Math.random(); } list = state.rndCache.filter(w => list.includes(w)); }
+  return list;
+}
+
+/* ================= 像素鲸鱼 ================= */
+const PAL = { b: "#4D6BFE", d: "#2F4FD8", w: "#E9EFFF", e: "#0B1B4D", s: "#8FA6FF", p: "#FF9DB0" };
+/* 网格 26×14：身体行跨度 (y3..y13)、肚皮 (y8..y12)、尾巴两帧、喷水、眼睛、腮红 */
+const BODY_ROWS = [[4, 19], [3, 20], [2, 21], [1, 22], [1, 22], [0, 21], [0, 20], [1, 18], [2, 16], [3, 14], [5, 12]];
+const BELLY = [[3, 5], [2, 6], [2, 7], [3, 8], [4, 7]];
+const TAIL_UP = [[20, 22, 1], [19, 23, 2], [19, 22, 3]];
+const TAIL_DOWN = [[20, 22, 2], [19, 23, 3], [19, 22, 4]];
+const SPOUT = [[2, 0], [1, 1], [3, 1], [2, 2]];
+function drawWhale(cv, frame, blink) {
+  const ctx = cv.getContext("2d");
+  const sc = Math.floor(Math.min(cv.width / 26, cv.height / 14));
+  ctx.clearRect(0, 0, cv.width, cv.height);
+  const px = (x, y, c) => { ctx.fillStyle = PAL[c]; ctx.fillRect(x * sc, y * sc, sc, sc); };
+  const span = (x0, x1, y, c) => { for (let x = x0; x <= x1; x++) px(x, y, c); };
+  BODY_ROWS.forEach(([a, b], i) => span(a, b, i + 3, "b"));
+  BELLY.forEach(([a, b], i) => span(a, b, i + 8, "w"));
+  (frame ? TAIL_DOWN : TAIL_UP).forEach(([a, b, y]) => span(a, b, y, "d"));
+  SPOUT.forEach(([x, y]) => px(x, y, "s"));
+  px(3, 7, blink ? "b" : "e");
+  px(7, 8, "p"); px(8, 8, "p");
+}
+let whaleTick = 0;
+setInterval(() => { const el = $("#whale"); if (!el) return; whaleTick++; drawWhale(el, whaleTick % 2, whaleTick % 16 === 3); }, 420);
+$("#whale")?.addEventListener("click", e => {
+  for (let i = 0; i < 6; i++) {
+    const b = document.createElement("div");
+    b.className = "bubble"; b.textContent = ["○", "♡", "◦", "🐳"][i % 4];
+    b.style.left = e.clientX + (Math.random() * 60 - 30) + "px";
+    b.style.top = e.clientY - 10 + "px";
+    document.body.appendChild(b);
+    setTimeout(() => b.remove(), 1300);
+  }
+});
+
+/* ================= 开机画面 ================= */
+function boot() {
+  if (REDUCED) return;
+  const el = document.createElement("div");
+  el.id = "boot";
+  el.innerHTML = `<div class="in">
+    <canvas width="312" height="168" style="image-rendering:pixelated"></canvas>
+    <div class="bt">FISH-DEX</div>
+    <div class="bs">蓝色大肥鱼 · 国庆特别版 VER.2026</div>
+    <div class="press">- PRESS ANY KEY -</div>
+    <div class="c">© 2026 BLUEDAFEIYU · LICENSED BY 国庆</div>
+  </div>`;
+  document.body.appendChild(el);
+  drawWhale(el.querySelector("canvas"), 0);
+  const off = () => { el.remove(); };
+  el.addEventListener("click", off);
+  addEventListener("keydown", off, { once: true });
+  setTimeout(off, 3200);
+}
+setTimeout(boot, 300);
+
+/* ================= 渲染：图鉴首页 ================= */
+function renderDex(list) {
+  state.rndCache = null;
+  const charChips = [{ id: "", name: "全部", colorSoft: "#4d6bfe", n: works.length }]
+    .concat(activeChars.map(c => ({ ...c, n: worksByChar.get(c.id).length })));
+  const catChips = D.categories.map(c => ({ ...c, n: works.filter(w => (w.categoryIds || []).includes(c.id)).length }));
+  const sorts = [["new", "最新 NEW"], ["old", "最早 OLD"], ["rnd", "乱序 RND"]];
+  view.innerHTML = `
+  <section class="stats">
+    <span>收录 <b>${works.length}</b> 件</span>
+    <span>角色 <b>${activeChars.length}</b> 位</span>
+    <span>最新收录 <b>${new Date(newestTs).toLocaleDateString("zh-CN", { month: "2-digit", day: "2-digit" })}</b></span>
+    <span>分类 <b>${D.categories.length}</b> 种</span>
+  </section>
+  <section class="deck" aria-label="筛选">
+    <div class="deck-row">
+      <div class="search"><span class="caret"></span>
+        <input id="q" type="search" placeholder="SEARCH… 作品名 / 描述 / 标签 / 角色" value="${esc(state.q)}" aria-label="检索作品">
+      </div>
+      <span class="hit" id="hit">HIT: ${list.length}</span>
+    </div>
+    <div class="deck-row"><span class="lbl">角色 CHAR</span>
+      <div class="chips" id="charChips">${charChips.map(c =>
+        `<button class="chip" data-char="${esc(c.id)}" aria-pressed="${state.char === c.id}" style="--c:${esc(c.colorSoft)}"><span class="dot"></span>${esc(c.name)} <span class="n">×${c.n}</span></button>`).join("")}
+      </div>
+    </div>
+    <div class="deck-row"><span class="lbl">分类 TYPE</span>
+      <div class="chips" id="catChips">${catChips.map(c =>
+        `<button class="chip" data-cat="${esc(c.id)}" aria-pressed="${state.cats.has(c.id)}">${esc(c.name)} <span class="n">×${c.n}</span></button>`).join("")}
+      </div>
+    </div>
+    <div class="deck-row"><span class="lbl">排序 SORT</span>
+      <div class="chips" id="sortChips">${sorts.map(([k, t]) =>
+        `<button class="chip" data-sort="${k}" aria-pressed="${state.sort === k}">${t}</button>`).join("")}
+      </div>
+    </div>
+    <div class="deck-row"><span class="lbl">显示 VIEW</span>
+      <div class="chips" id="modeChips">
+        <button class="chip" data-mode="crop" aria-pressed="${state.mode === "crop"}">裁切 CROP <span class="n">方格</span></button>
+        <button class="chip" data-mode="fit" aria-pressed="${state.mode === "fit"}">完整 FIT <span class="n">瀑布流</span></button>
+      </div>
+    </div>
+  </section>
+  ${list.length ? `<div class="grid${state.mode === "fit" ? " fit" : ""}" id="grid">${list.map(cardHTML).join("")}</div>`
+    : `<div class="empty"><span class="ghost">👻</span>NO SIGNAL —— 没有匹配的作品，换个条件试试</div>`}`;
+
+  $("#q").addEventListener("input", e => { state.q = e.target.value; refresh(); });
+  $("#charChips").addEventListener("click", e => { const b = e.target.closest("[data-char]"); if (b) { state.char = b.dataset.char; refresh(); } });
+  $("#catChips").addEventListener("click", e => {
+    const b = e.target.closest("[data-cat]"); if (!b) return;
+    const c = b.dataset.cat; state.cats.has(c) ? state.cats.delete(c) : state.cats.add(c); refresh();
+  });
+  $("#sortChips").addEventListener("click", e => { const b = e.target.closest("[data-sort]"); if (b) { state.sort = b.dataset.sort; refresh(); } });
+  $("#modeChips").addEventListener("click", e => {
+    const b = e.target.closest("[data-mode]"); if (!b) return;
+    state.mode = b.dataset.mode;
+    try { localStorage.setItem("fishdex-mode", state.mode); } catch {}
+    refresh();
+  });
+  $("#grid")?.addEventListener("click", e => { const c = e.target.closest("[data-slug]"); if (c) state.lastList = "#/"; });
+}
+
+const thumbNo = new Map([...works].sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt)).map((w, i) => [w.slug, i + 1]));
+function cardHTML(w) {
+  const c = charById.get(w.characterId);
+  return `<a class="card" href="#/w/${esc(w.slug)}" data-slug="${esc(w.slug)}" style="--c:${esc(c ? c.colorDeep : "#4d6bfe")};--ar:${w.width || 1}/${w.height || 1}">
+    <span class="no">No.${pad(thumbNo.get(w.slug), 3)}</span>
+    ${isNew(w) ? '<span class="new">NEW!</span>' : ""}
+    <img class="ph" loading="lazy" decoding="async" src="${esc(w.thumb)}" alt="${esc(w.name)}">
+    <span class="bar"><span class="dot"></span><span class="nm">${esc(w.name)}</span></span>
+  </a>`;
+}
+function refresh() {
+  const list = filtered();
+  const hit = $("#hit"); if (hit) hit.textContent = "HIT: " + list.length;
+  const grid = $("#grid");
+  if (grid) {
+    grid.classList.toggle("fit", state.mode === "fit");
+    grid.innerHTML = list.length ? list.map(cardHTML).join("") : "";
+    if (!list.length && !$(".empty")) grid.insertAdjacentHTML("afterend", `<div class="empty"><span class="ghost">👻</span>NO SIGNAL —— 没有匹配的作品，换个条件试试</div>`);
+    if (list.length) $(".empty")?.remove();
+  }
+  document.querySelectorAll("#charChips .chip").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.char === state.char)));
+  document.querySelectorAll("#catChips .chip").forEach(b => b.setAttribute("aria-pressed", String(state.cats.has(b.dataset.cat))));
+  document.querySelectorAll("#sortChips .chip").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.sort === state.sort)));
+  document.querySelectorAll("#modeChips .chip").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.mode === state.mode)));
+}
+
+/* ================= 渲染：角色图鉴 ================= */
+function renderChars() {
+  view.innerHTML = `<div class="roster">${activeChars.map(c => {
+    const ws = worksByChar.get(c.id);
+    const recent = ws.filter(isNew).length;
+    const tagCount = new Map();
+    ws.forEach(w => (w.tags || []).forEach(t => tagCount.set(t, (tagCount.get(t) || 0) + 1)));
+    const tags = [...tagCount.entries()].sort((a, b) => b[1] - a[1]).slice(0, 3).map(e => e[0]);
+    return `<button class="trainer" data-char="${esc(c.id)}" style="--cs:${esc(c.colorSoft)};--cd:${esc(c.colorDeep)}">
+      <span class="head"><span class="cn">${esc(c.name)}</span><span class="eid">${esc(c.id.toUpperCase())}</span>
+        <span class="cnt">×${ws.length}${recent ? " · NEW " + recent : ""}</span></span>
+      <span class="body">${esc(c.aliases && c.aliases.length ? "别名：" + c.aliases.join(" / ") : "档案收录中…")}
+        <span class="tags">${tags.map(t => `<i>#${esc(t)}</i>`).join("")}</span></span>
+      <span class="go">▶ 查看图鉴</span>
+    </button>`;
+  }).join("")}</div>`;
+  view.querySelector(".roster").addEventListener("click", e => {
+    const b = e.target.closest("[data-char]"); if (!b) return;
+    state.char = b.dataset.char; state.q = ""; state.cats.clear(); state.sort = "new";
+    location.hash = "#/";
+  });
+}
+
+/* ================= 渲染：详情 ================= */
+let typeTimer = null;
+function renderDetail(slug) {
+  const w = works.find(x => x.slug === slug);
+  if (!w) { location.hash = state.lastList; return; }
+  let list = filtered();
+  let idx = list.findIndex(x => x.slug === slug);
+  if (idx < 0) { list = works; idx = works.findIndex(x => x.slug === slug); } // 随机进入时不在筛选结果里，退回全库导航
+  const c = charById.get(w.characterId);
+  const prev = idx > 0 ? list[idx - 1] : null;
+  const next = idx >= 0 && idx < list.length - 1 ? list[idx + 1] : null;
+  const cats = (w.categoryIds || []).map(id => catById.get(id)?.name).filter(Boolean);
+  document.title = `${w.name} · 肥鱼图鉴 FISH-DEX`;
+  view.innerHTML = "";
+  const el = document.createElement("div");
+  el.className = "detail";
+  el.innerHTML = `<div class="win" role="dialog" aria-modal="true" aria-label="${esc(w.name)}">
+    <div class="win-head">🔍 FISH-DEX SCAN —— No.${pad(thumbNo.get(w.slug) || 0, 3)} <span class="dim">${idx >= 0 ? (idx + 1) + "/" + list.length : ""}</span>
+      <button class="x" id="dx" aria-label="关闭">✕ ESC</button></div>
+    <div class="win-body">
+      <div class="pic"><img src="${esc(w.large || w.thumb)}" data-alt="${esc(w.thumb)}" alt="${esc(w.name)}"></div>
+      <div class="info">
+        <h2>${esc(w.name)}</h2>
+        <div class="code">ID ${esc(w.slug)} · ${w.width}×${w.height}px · ${new Date(w.createdAt).toLocaleDateString("zh-CN")}</div>
+        <div class="row">${c ? `<span class="chip" style="--c:${esc(c.colorDeep)};background:${esc(c.colorDeep)};border-color:${esc(c.colorSoft)};color:#fff" aria-pressed="true"><span class="dot"></span>${esc(c.name)}</span>` : ""}
+          ${cats.map(t => `<span class="chip" aria-pressed="true">${esc(t)}</span>`).join("")}</div>
+        <p class="kv">▌描述 DESCRIPTION</p><p class="desc">${esc(w.description || "（暂无描述）")}</p>
+        <p class="kv">▌标签 TAGS</p><div class="row">${(w.tags || []).map(t => `<span class="chip" aria-pressed="true">#${esc(t)}</span>`).join("") || '<span class="dim">无</span>'}</div>
+        <p class="kv">▌碎碎念 COMMENTARY</p>
+        <div class="dex-entry" id="dex"><span id="dex-text"></span><span class="more">▼</span></div>
+        <div class="btn-row">
+          <a class="btn gold" href="${esc(w.original || w.large)}" download target="_blank" rel="noopener">⬇ 下载原图</a>
+          <a class="btn primary" href="${esc(w.page)}" target="_blank" rel="noopener">↗ 正式站页面</a>
+        </div>
+        <div class="nav-btns">
+          <button class="btn" id="dprev" ${prev ? "" : "disabled"}>◀ 上一件</button>
+          <button class="btn" id="dnext" ${next ? "" : "disabled"}>下一件 ▶</button>
+        </div>
+      </div>
+    </div></div>`;
+  view.appendChild(el);
+  const close = () => { location.hash = state.lastList; };
+  el.querySelector("#dx").addEventListener("click", close);
+  el.addEventListener("click", e => { if (e.target === el) close(); });
+  if (prev) el.querySelector("#dprev").addEventListener("click", () => location.hash = "#/w/" + prev.slug);
+  if (next) el.querySelector("#dnext").addEventListener("click", () => location.hash = "#/w/" + next.slug);
+  keyNav = e => {
+    if (e.key === "Escape") close();
+    else if (e.key === "ArrowLeft" && prev) location.hash = "#/w/" + prev.slug;
+    else if (e.key === "ArrowRight" && next) location.hash = "#/w/" + next.slug;
+  };
+  // 图鉴解说打字机
+  const text = w.commentary || "（这条作品还没有碎碎念。）";
+  const dexEl = el.querySelector("#dex"), dexText = el.querySelector("#dex-text");
+  if (REDUCED) { dexText.textContent = text; dexEl.classList.add("done"); }
+  else {
+    let i = 0; clearInterval(typeTimer);
+    const done = () => { clearInterval(typeTimer); dexText.textContent = text; dexEl.classList.add("done"); };
+    typeTimer = setInterval(() => {
+      i += 2; if (i >= text.length) done(); else dexText.textContent = text.slice(0, i);
+    }, 16);
+    dexEl.addEventListener("click", done);
+  }
+}
+let keyNav = null;
+addEventListener("keydown", e => { if (keyNav) keyNav(e); });
+
+/* ================= 路由 ================= */
+function setTab(name) {
+  $("#tab-dex").setAttribute("aria-selected", String(name === "dex"));
+  $("#tab-chars").setAttribute("aria-selected", String(name === "chars"));
+  $("#tab-random").setAttribute("aria-selected", "false");
+}
+function route() {
+  clearInterval(typeTimer); keyNav = null;
+  const h = location.hash;
+  if (h.startsWith("#/w/")) { setTab("dex"); renderDetail(h.slice(4)); return; }
+  document.title = "肥鱼图鉴 FISH-DEX · 蓝色大肥鱼国庆特别版";
+  if (h === "#/chars") { setTab("chars"); renderChars(); return; }
+  setTab("dex"); renderDex(filtered());
+}
+$("#tab-dex").addEventListener("click", () => location.hash = "#/");
+$("#tab-chars").addEventListener("click", () => location.hash = "#/chars");
+$("#tab-random").addEventListener("click", () => {
+  const w = works[Math.floor(Math.random() * works.length)];
+  state.lastList = location.hash || "#/";
+  location.hash = "#/w/" + w.slug;
+});
+addEventListener("hashchange", route);
+
+/* ================= 启动 ================= */
+$("#marquee").textContent = ("🐳 国庆快乐！肥鱼图鉴 2026 国庆特别版开机 ★ 本次收录 " + works.length + " 件 AI 娘二创 ★ DeepSeek娘 " + worksByChar.get("deepseek").length + " 件领衔出演 ★ 全部作品可回到正式站下载原图 ★ 戳一头像素鲸鱼试试 ★ ").repeat(3);
+$("#synced-at").textContent = syncedAt.toLocaleDateString("zh-CN");
+$("#collect-rate").textContent = "100%";
+route();
+</script>
+</body>
+</html>

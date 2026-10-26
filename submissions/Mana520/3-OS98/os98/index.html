@@ -1,0 +1,698 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>大肥鱼 OS 98 · 国庆纪念版</title>
+<meta name="description" content="把「蓝色大肥鱼」做成一台 1998 年的老电脑：桌面图标、可拖动窗口、资源管理器、图片查看器、开始菜单与任务栏。441 件 AI 娘二创全部变成桌面文件。">
+<link rel="stylesheet" href="../../../starter/tokens.css">
+<style>
+/* ================================================================
+   大肥鱼 OS 98 —— Win98 桌面拟物 · 单文件 · 零依赖
+   数据来自 ../../../starter/data.js (window.SITE_DATA)
+   ================================================================ */
+:root {
+  --gray: #c0c0c0; --gray-d: #808080; --gray-l: #dfdfdf;
+  --navy: #000080; --navy2: #1084d0; --desk: #0a1f4e;
+  --font: Tahoma, "MS Sans Serif", "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body { margin: 0; overflow: hidden; font-family: var(--font); font-size: 12px; }
+.bevel-out { box-shadow: inset -1px -1px #0a0a0a, inset 1px 1px #fff, inset -2px -2px var(--gray-d), inset 2px 2px var(--gray-l); }
+.bevel-in  { box-shadow: inset -1px -1px #fff, inset 1px 1px #0a0a0a, inset -2px -2px var(--gray-l), inset 2px 2px var(--gray-d); }
+
+/* ---------- 桌面 ---------- */
+#desktop { position: fixed; inset: 0; background: var(--desk);
+  background-image: linear-gradient(rgba(77,107,254,.06) 1px, transparent 1px), linear-gradient(90deg, rgba(77,107,254,.06) 1px, transparent 1px);
+  background-size: 28px 28px; overflow: hidden; }
+#wall { position: absolute; right: 18px; bottom: 52px; opacity: .1; pointer-events: none; image-rendering: pixelated; }
+#icons { position: absolute; inset: 8px 8px 42px; display: flex; flex-direction: column; flex-wrap: wrap; gap: 8px; align-content: flex-start; }
+.dicon { width: 88px; color: #fff; text-align: center; cursor: default; user-select: none; }
+.dicon .em { font-size: 34px; line-height: 1.15; display: block; filter: drop-shadow(1px 2px 2px rgba(0,0,0,.55)); }
+.dicon span { display: inline-block; padding: 1px 4px; line-height: 1.3; font-size: 11px; text-shadow: 1px 1px 2px #000; word-break: break-all; }
+.dicon.sel span { background: var(--navy); text-shadow: none; outline: 1px dotted #fff; }
+
+/* ---------- 窗口 ---------- */
+.win { position: absolute; background: var(--gray); padding: 3px; display: flex; flex-direction: column; min-width: 240px; min-height: 120px; }
+.tbar { display: flex; align-items: center; gap: 5px; height: 24px; padding: 0 3px 0 6px; user-select: none; cursor: default; touch-action: none;
+  background: linear-gradient(90deg, #7b7b7b, #b5b5b5); color: #d8d8d8; font-weight: 700; font-size: 12px; }
+/* 窗口缩放热区：右下角 grip + 右缘 + 下缘 */
+.grip { position: absolute; right: 2px; bottom: 2px; width: 17px; height: 17px; cursor: nwse-resize; z-index: 6; touch-action: none;
+  background: repeating-linear-gradient(135deg, transparent 0 4px, #fff 4px 5px, #808080 5px 6px); }
+.edge-e { position: absolute; top: 5px; right: 0; bottom: 20px; width: 5px; cursor: ew-resize; z-index: 6; touch-action: none; }
+.edge-s { position: absolute; left: 5px; right: 20px; bottom: 0; height: 5px; cursor: ns-resize; z-index: 6; touch-action: none; }
+.win.maxed .grip, .win.maxed .edge-e, .win.maxed .edge-s { display: none; }
+.win.act .tbar { background: linear-gradient(90deg, var(--navy), var(--navy2)); color: #fff; }
+.tbar .ico { font-size: 13px; font-weight: 400; }
+.tbar .ttl { flex: 1; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.tbtn { width: 20px; height: 18px; flex: none; background: var(--gray); border: 0; padding: 0;
+  font: 700 10px/16px var(--font); color: #000; cursor: pointer; }
+.win-body { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+
+/* 菜单栏 / 工具栏 / 状态栏 */
+.menubar { display: flex; gap: 2px; padding: 2px 4px; font-size: 12px; }
+.menubar span { padding: 1px 7px; cursor: default; }
+.menubar span:hover { background: var(--navy); color: #fff; }
+.toolbar { display: flex; gap: 6px; padding: 4px 3px; align-items: center; flex-wrap: wrap; font-size: 12px; }
+.in98 { background: #fff; border: 0; padding: 3px 7px; font: 12px var(--font); outline: 0; min-width: 0; }
+.in98:focus { outline: 1px dotted #000; outline-offset: -3px; }
+.sel98 { background: #fff; border: 0; padding: 3px 4px; font: 12px var(--font); outline: 0; }
+.btn98 { background: var(--gray); border: 0; padding: 3px 12px; font: 12px var(--font); cursor: pointer; }
+.btn98:active, .taskbtn.on { box-shadow: inset -1px -1px #fff, inset 1px 1px #0a0a0a, inset -2px -2px var(--gray-l), inset 2px 2px var(--gray-d); }
+a.btn98 { display: inline-block; text-decoration: none; color: #000; }
+.sbar { display: flex; gap: 3px; padding-top: 3px; font-size: 11px; }
+.sbar > span { padding: 2px 8px; overflow: hidden; white-space: nowrap; }
+.sbar > span:first-child { flex: 1; }
+.addr { flex: 1; display: flex; align-items: center; gap: 4px; background: #fff; padding: 2px 6px; min-width: 90px; overflow: hidden; white-space: nowrap; }
+
+/* 资源管理器网格 */
+.gridarea { flex: 1; min-height: 0; overflow: auto; background: #fff; padding: 10px;
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(88px, 1fr)); gap: 12px 8px; align-content: start; }
+.fitem { text-align: center; cursor: default; user-select: none; }
+.fitem img { width: 64px; height: 64px; object-fit: cover; background: #ececec; outline: 1px solid var(--gray-d); display: block; margin: 0 auto; }
+.fitem .nm { display: block; padding: 2px 3px; margin-top: 3px; font-size: 11px; line-height: 1.3; color: #000; word-break: break-all; }
+.fitem.sel .nm { background: var(--navy); color: #fff; }
+.fitem.sel img { outline: 2px solid var(--navy); }
+.fitem .no { font-size: 10px; color: var(--gray-d); }
+.fitem.sel .no { color: #cdd6f8; }
+.newdot { color: #c00; font-weight: 700; }
+
+/* 查看器 */
+.vwrap { flex: 1; min-height: 0; display: flex; }
+.vimg { flex: 1.5; min-width: 0; margin: 3px; background: #fff; position: relative; overflow: hidden; }
+.vimg img { position: absolute; inset: 0; margin: auto; max-width: calc(100% - 16px); max-height: calc(100% - 16px); object-fit: contain; }
+.vimg .tag { position: absolute; left: 10px; top: 8px; font-size: 11px; color: #444; background: rgba(255,255,255,.8); padding: 1px 6px; }
+.vpanel { flex: 1; max-width: 235px; min-width: 185px; padding: 10px 10px 6px; overflow: auto; }
+/* 窄窗口：查看器自动改为「上图下文」 */
+.win-body.narrow .vwrap { flex-direction: column; }
+.win-body.narrow .vimg { flex: none; height: 52%; min-height: 170px; }
+.win-body.narrow .vpanel { flex: 1; max-width: none; min-width: 0; border-top: 1px solid var(--gray-d); }
+.vpanel h2 { margin: 0 0 2px; font-size: 16px; line-height: 1.3; }
+.vpanel .meta { font-size: 11px; color: #333; margin-bottom: 8px; }
+.vpanel .who { font-weight: 700; }
+.vpanel .desc { font-size: 12px; line-height: 1.65; margin: 8px 0; }
+.note { background: #ffffc8; padding: 8px 10px; font-size: 12px; line-height: 1.7; margin: 8px 0; }
+.note::before { content: "🐟 鱼说："; font-weight: 700; }
+.tags { font-size: 11px; color: #333; margin: 6px 0 10px; line-height: 1.8; }
+.tags i { font-style: normal; border-bottom: 1px solid var(--gray-d); margin-right: 6px; }
+.vbtns { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 6px; }
+
+/* 记事本 */
+.notepad { flex: 1; margin: 3px; background: #fff; overflow: auto; padding: 12px 14px; font-size: 12.5px; line-height: 1.9; }
+.notepad h3 { margin: 0 0 6px; font-size: 14px; }
+.notepad hr { border: 0; border-top: 1px dashed var(--gray-d); margin: 10px 0; }
+
+/* 烟花窗口 */
+.fwcanvas { display: block; margin: 3px auto; background: #000; outline: 1px solid var(--gray-d); }
+.fwcap { text-align: center; padding: 4px 0 6px; font-size: 12px; }
+
+/* ---------- 任务栏 ---------- */
+#taskbar { position: absolute; left: 0; right: 0; bottom: 0; height: 38px; background: var(--gray);
+  border-top: 1px solid #fff; box-shadow: 0 -1px 0 var(--gray-l); display: flex; gap: 4px; padding: 4px 5px; align-items: stretch; z-index: 500; }
+#startbtn { font-weight: 700; font-size: 13px; padding: 2px 12px; display: flex; align-items: center; gap: 6px; }
+#taskbuttons { flex: 1; display: flex; gap: 4px; overflow: hidden; }
+.taskbtn { flex: 0 1 165px; min-width: 60px; text-align: left; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-size: 11px; padding: 2px 8px; }
+#tray { display: flex; align-items: center; gap: 8px; padding: 0 10px; font-size: 12px; }
+#tray .spk { cursor: pointer; padding: 0 2px; }
+
+/* ---------- 开始菜单 ---------- */
+#smenu { position: absolute; left: 4px; bottom: 40px; width: 236px; background: var(--gray); padding: 3px; display: none; z-index: 600; }
+#smenu .inner { display: flex; }
+#smenu .stripe { width: 26px; background: linear-gradient(180deg, #000080, #1084d0); color: #cdd6f8;
+  writing-mode: vertical-rl; transform: rotate(180deg); font-weight: 700; font-size: 12px; padding: 8px 3px; text-align: left; letter-spacing: .1em; }
+#smenu .items { flex: 1; padding: 2px; }
+.smitem { display: flex; align-items: center; gap: 10px; padding: 7px 10px; font-size: 13px; cursor: default; }
+.smitem:hover { background: var(--navy); color: #fff; }
+.smitem .em { width: 22px; text-align: center; font-size: 16px; }
+.smsep { height: 1px; background: var(--gray-d); border-bottom: 1px solid #fff; margin: 3px 6px; }
+
+/* ---------- 开机 / 关机 / 蓝屏 ---------- */
+#boot { position: fixed; inset: 0; background: #000; z-index: 1500; display: grid; place-items: center; cursor: pointer; color: #fff; text-align: center; }
+#boot .osname { font-size: clamp(30px, 6vw, 46px); font-weight: 700; letter-spacing: .06em; margin-top: 18px; }
+#boot .osname i { font-style: normal; color: #7ea0ff; }
+#boot .sub { font-size: 12px; color: #9aa7d8; margin-top: 8px; letter-spacing: .25em; }
+#boot .bar { width: 220px; height: 14px; margin: 26px auto 0; border: 1px solid #7ea0ff; padding: 2px; }
+#boot .bar i { display: block; height: 100%; width: 40%; background: #7ea0ff; animation: load 1.1s steps(6) infinite; }
+@keyframes load { 0% { width: 5% } 100% { width: 100% } }
+#boot .hint { font-size: 11px; color: #5d6ba8; margin-top: 22px; }
+#off { position: fixed; inset: 0; background: #000; z-index: 2000; display: none; place-items: center; cursor: pointer; }
+#off .t { color: #ffae00; font-size: 22px; text-align: center; line-height: 2; }
+#off .s { color: #7a7a7a; font-size: 12px; text-align: center; margin-top: 14px; }
+#bsod { position: fixed; inset: 0; background: #0000aa; color: #fff; z-index: 3000; display: none; place-items: center; font-family: var(--font); }
+#bsod .in { max-width: 560px; margin: 0 20px; line-height: 1.9; }
+#bsod .ttl { background: #aaa; color: #0000aa; display: inline-block; padding: 0 10px; margin-bottom: 14px; font-weight: 700; }
+
+@media (max-width: 640px) {
+  #icons { inset: 6px 6px 42px; }
+  .dicon { width: 72px; }
+  .dicon .em { font-size: 27px; }
+  #smenu { width: 200px; }
+}
+@media (prefers-reduced-motion: reduce) { #boot .bar i { animation: none; width: 100%; } }
+</style>
+</head>
+<body>
+
+<div id="bsod"><div class="in">
+  <span class="ttl">FISH OS 98</span>
+  <p>发生了一个致命异常 0E 在 0028:C00A1D3B 的 VBLUEWHALE.VXD 中。</p>
+  <p>* 请把本页放在活动仓库 submissions/你的GitHub用户名/ 下再打开，<br>系统通过 ..\..\starter\data.js 读取数据卡带。</p>
+  <p>* 按任意键继续 _</p>
+</div></div>
+
+<div id="desktop">
+  <canvas id="wall" width="312" height="168"></canvas>
+  <div id="icons"></div>
+  <div id="wins"></div>
+  <div id="smenu"><div class="inner">
+    <div class="stripe">大肥鱼 OS 98</div>
+    <div class="items">
+      <div class="smitem" data-act="explore"><span class="em">🖼️</span>作品库</div>
+      <div class="smitem" data-act="random"><span class="em">🎲</span>随机一条</div>
+      <div class="smitem" data-act="fw"><span class="em">🎉</span>国庆烟花</div>
+      <div class="smsep"></div>
+      <div class="smitem" data-act="about"><span class="em">📝</span>关于本站</div>
+      <div class="smitem" data-act="off"><span class="em">⏻</span>关机…</div>
+    </div>
+  </div></div>
+  <div id="taskbar">
+    <button class="btn98 bevel-out" id="startbtn">🐳 开始</button>
+    <div id="taskbuttons"></div>
+    <div id="tray" class="bevel-in"><span class="spk" id="spk" title="静音开关">🔊</span><span id="clock">--:--</span></div>
+  </div>
+</div>
+
+<div id="off"><div><div class="t">您现在可以安全地关闭大肥鱼了。</div><div class="s">（点击任意处重新开机）</div></div></div>
+
+<div id="boot">
+  <div>
+    <canvas id="bootwhale" width="208" height="112" style="image-rendering:pixelated"></canvas>
+    <div class="osname">大肥鱼 <i>OS 98</i></div>
+    <div class="sub">BLUE WHALE DESKTOP · 国庆纪念版</div>
+    <div class="bar"><i></i></div>
+    <div class="hint">正在启动… 点击跳过</div>
+  </div>
+</div>
+
+<script src="../../../starter/data.js"></script>
+<script>
+"use strict";
+/* ================= 基础 ================= */
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const pad = (n, l) => String(n).padStart(l, "0");
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const TOUCH = matchMedia("(hover: none), (pointer: coarse)").matches;
+/* 图片加载失败：先回退 thumb，再失败就换占位 */
+document.addEventListener("error", e => {
+  const t = e.target;
+  if (t.tagName !== "IMG") return;
+  if (!t.dataset.fb && t.dataset.alt) { t.dataset.fb = "1"; t.src = t.dataset.alt; return; }
+  if (t.closest(".vimg")) { const d = document.createElement("div"); d.textContent = "🐳 图片走丢了"; d.style.cssText = "position:absolute;inset:0;display:grid;place-items:center;color:#666"; t.replaceWith(d); }
+}, true);
+
+const D = window.SITE_DATA;
+if (!D || !Array.isArray(D.works)) {
+  $("#bsod").style.display = "grid";
+  throw new Error("SITE_DATA missing");
+}
+const works = D.works;
+const charById = new Map(D.characters.map(c => [c.id, c]));
+const catById = new Map(D.categories.map(c => [c.id, c]));
+const worksByChar = new Map(D.characters.map(c => [c.id, []]));
+works.forEach(w => worksByChar.get(w.characterId)?.push(w));
+const activeChars = D.characters.filter(c => worksByChar.get(c.id).length);
+const newestTs = Math.max(...works.map(w => +new Date(w.createdAt)));
+const newSet = new Set([...works].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 20).map(w => w.slug));
+const isNew = w => newSet.has(w.slug);
+const thumbNo = new Map([...works].sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt)).map((w, i) => [w.slug, i + 1]));
+const whoOf = w => charById.get(w.characterId)?.name || "其他角色";
+
+/* ================= 像素鲸鱼（壁纸/开机） ================= */
+const PAL = { b: "#4D6BFE", d: "#2F4FD8", w: "#E9EFFF", e: "#0B1B4D", s: "#8FA6FF", p: "#FF9DB0" };
+const BODY_ROWS = [[4,19],[3,20],[2,21],[1,22],[1,22],[0,21],[0,20],[1,18],[2,16],[3,14],[5,12]];
+const BELLY = [[3,5],[2,6],[2,7],[3,8],[4,7]];
+const TAIL_UP = [[20,22,1],[19,23,2],[19,22,3]];
+const TAIL_DOWN = [[20,22,2],[19,23,3],[19,22,4]];
+const SPOUT = [[2,0],[1,1],[3,1],[2,2]];
+function drawWhale(cv, frame) {
+  const ctx = cv.getContext("2d");
+  const sc = Math.floor(Math.min(cv.width / 26, cv.height / 14));
+  ctx.clearRect(0, 0, cv.width, cv.height);
+  const px = (x, y, c) => { ctx.fillStyle = PAL[c]; ctx.fillRect((x + 1) * sc, (y + 1) * sc, sc, sc); };
+  const span = (a, b, y, c) => { for (let i = a; i <= b; i++) px(i, y, c); };
+  BODY_ROWS.forEach(([a, b], i) => span(a, b, i + 3, "b"));
+  BELLY.forEach(([a, b], i) => span(a, b, i + 8, "w"));
+  (frame % 2 ? TAIL_DOWN : TAIL_UP).forEach(([a, b, y]) => span(a, b, y, "d"));
+  SPOUT.forEach(([x, y]) => px(x, y, "s"));
+  px(3, 7, "e"); px(7, 8, "p"); px(8, 8, "p");
+}
+drawWhale($("#wall"), 0);
+let bootFrame = 0;
+const bootTimer = setInterval(() => { drawWhale($("#bootwhale"), bootFrame++); }, 400);
+drawWhale($("#bootwhale"), 0);
+
+/* ================= 音效 ================= */
+let audio = null, muted = false;
+function ac() { if (!audio) { try { audio = new (window.AudioContext || window.webkitAudioContext)(); } catch {} } return audio; }
+function beep(f, dur, type, vol) {
+  const a = ac(); if (!a || muted) return;
+  const o = a.createOscillator(), g = a.createGain();
+  o.type = type || "square"; o.frequency.value = f;
+  g.gain.setValueAtTime(vol || .05, a.currentTime);
+  g.gain.exponentialRampToValueAtTime(.0001, a.currentTime + dur);
+  o.connect(g); g.connect(a.destination); o.start(); o.stop(a.currentTime + dur);
+}
+const sfxOpen = () => beep(660, .07, "square", .04);
+const sfxClose = () => beep(330, .07, "square", .04);
+const sfxChime = () => { [523, 659, 784, 1046].forEach((f, i) => setTimeout(() => beep(f, .12, "sine", .06), i * 110)); };
+$("#spk").addEventListener("click", () => { muted = !muted; $("#spk").textContent = muted ? "🔇" : "🔊"; });
+
+/* ================= 窗口管理器 ================= */
+const wm = new Map();   // key -> win
+let zTop = 10, cascade = 0, activeKey = null;
+const winsEl = $("#wins"), taskbuttons = $("#taskbuttons");
+const syncNarrow = w => { if (w && w.body) w.body.classList.toggle("narrow", w.el.offsetWidth < 560); };
+
+function focusWin(key) {
+  activeKey = key;
+  wm.forEach(w => { w.el.classList.toggle("act", w.key === key); w.taskbtn.classList.toggle("on", w.key === key && !w.min); });
+  const w = wm.get(key); if (w && !w.min) w.el.style.zIndex = ++zTop;
+}
+function makeWindow(key, opts) {
+  const exist = wm.get(key);
+  if (exist) { restoreWin(key); return exist; }
+  const desk = $("#desktop").getBoundingClientRect();
+  const W0 = Math.min(opts.w || 620, desk.width - 16), H0 = Math.min(opts.h || 420, desk.height - 60);
+  const x = clamp(desk.width - W0 > 20 ? (opts.x ?? (28 + cascade * 26) % Math.max(60, desk.width - W0 - 20)) : 6, 4, Math.max(4, desk.width - W0 - 4));
+  const y = clamp(opts.y ?? (20 + cascade * 22), 2, Math.max(2, desk.height - H0 - 44));
+  cascade = (cascade + 1) % 8;
+
+  const el = document.createElement("div");
+  el.className = "win act bevel-out";
+  el.style.cssText = `left:${x}px;top:${y}px;width:${W0}px;height:${H0}px;z-index:${++zTop}`;
+  el.innerHTML = `
+    <div class="tbar">
+      <span class="ico">${opts.icon || "🗔"}</span><span class="ttl">${esc(opts.title)}</span>
+      <button class="tbtn bevel-out" data-a="min" title="最小化">_</button>
+      <button class="tbtn bevel-out" data-a="max" title="最大化">□</button>
+      <button class="tbtn bevel-out" data-a="close" title="关闭">✕</button>
+    </div>
+    <div class="win-body"></div>`;
+  winsEl.appendChild(el);
+  const body = el.querySelector(".win-body");
+
+  const taskbtn = document.createElement("button");
+  taskbtn.className = "taskbtn btn98 bevel-out";
+  taskbtn.innerHTML = `${opts.icon || "🗔"} ${esc(opts.title)}`;
+  taskbtn.addEventListener("click", () => {
+    const w = wm.get(key); if (!w) return;
+    if (w.min) restoreWin(key); else if (activeKey === key) minimizeWin(key); else focusWin(key);
+  });
+  taskbuttons.appendChild(taskbtn);
+
+  const win = { key, el, body, taskbtn, icon: opts.icon || "🗔", title: opts.title, min: false, max: false, prevRect: null, meta: opts.meta || {}, onClose: null };
+  wm.set(key, win);
+
+  el.addEventListener("pointerdown", () => focusWin(key), true);
+  el.querySelectorAll(".tbtn").forEach(b => b.addEventListener("click", e => {
+    e.stopPropagation();
+    const a = b.dataset.a;
+    if (a === "close") closeWin(key);
+    else if (a === "min") minimizeWin(key);
+    else toggleMax(key);
+  }));
+  // 拖动
+  const tbar = el.querySelector(".tbar");
+  tbar.addEventListener("pointerdown", e => {
+    if (e.target.closest(".tbtn") || win.max) return;
+    const sx = e.clientX, sy = e.clientY, ox = el.offsetLeft, oy = el.offsetTop;
+    const move = ev => {
+      el.style.left = clamp(ox + ev.clientX - sx, -W0 + 90, desk.width - 70) + "px";
+      el.style.top = clamp(oy + ev.clientY - sy, 0, desk.height - 64) + "px";
+    };
+    const up = () => { removeEventListener("pointermove", move); removeEventListener("pointerup", up); };
+    addEventListener("pointermove", move); addEventListener("pointerup", up);
+  });
+  tbar.addEventListener("dblclick", e => { if (!e.target.closest(".tbtn")) toggleMax(key); });
+
+  // 缩放：右下角 grip / 右缘 / 下缘
+  const startResize = (e, dirs) => {
+    if (win.max) return;
+    e.preventDefault(); e.stopPropagation();
+    focusWin(key);
+    const sx = e.clientX, sy = e.clientY, sw = el.offsetWidth, sh = el.offsetHeight;
+    const move = ev => {
+      if (dirs.includes("e")) el.style.width = clamp(sw + ev.clientX - sx, 260, desk.width - el.offsetLeft - 4) + "px";
+      if (dirs.includes("s")) el.style.height = clamp(sh + ev.clientY - sy, 150, desk.height - el.offsetTop - 44) + "px";
+    };
+    const up = () => { removeEventListener("pointermove", move); removeEventListener("pointerup", up); syncNarrow(win); };
+    addEventListener("pointermove", move); addEventListener("pointerup", up);
+  };
+  const mkZone = cls => { const z = document.createElement("div"); z.className = cls; el.appendChild(z); return z; };
+  mkZone("grip").addEventListener("pointerdown", e => startResize(e, "es"));
+  mkZone("edge-e").addEventListener("pointerdown", e => startResize(e, "e"));
+  mkZone("edge-s").addEventListener("pointerdown", e => startResize(e, "s"));
+
+  if (opts.content) body.innerHTML = opts.content;
+  if (opts.after) opts.after(win);
+  focusWin(key);
+  sfxOpen();
+  syncNarrow(win);
+  if (desk.width <= 560) toggleMax(key); // 窄面板：窗口默认最大化
+  return win;
+}
+function closeWin(key) {
+  const w = wm.get(key); if (!w) return;
+  if (w.onClose) w.onClose();
+  w.el.remove(); w.taskbtn.remove(); wm.delete(key);
+  if (activeKey === key) activeKey = null;
+  sfxClose();
+}
+function minimizeWin(key) {
+  const w = wm.get(key); if (!w) return;
+  w.min = true; w.el.style.display = "none"; w.taskbtn.classList.remove("on");
+}
+function restoreWin(key) {
+  const w = wm.get(key); if (!w) return;
+  w.min = false; w.el.style.display = ""; focusWin(key);
+}
+function toggleMax(key) {
+  const w = wm.get(key); if (!w) return;
+  if (!w.max) {
+    w.prevRect = { l: w.el.style.left, t: w.el.style.top, w: w.el.style.width, h: w.el.style.height };
+    Object.assign(w.el.style, { left: "2px", top: "2px", width: "calc(100% - 4px)", height: "calc(100% - 42px)" });
+  } else {
+    Object.assign(w.el.style, { left: w.prevRect.l, top: w.prevRect.t, width: w.prevRect.w, height: w.prevRect.h });
+  }
+  w.max = !w.max;
+  w.el.classList.toggle("maxed", w.max);
+  syncNarrow(w);
+}
+/* 面板尺寸变化：把所有窗口拉回可视区 */
+let rzT = 0;
+addEventListener("resize", () => {
+  clearTimeout(rzT);
+  rzT = setTimeout(() => {
+    const dk = $("#desktop").getBoundingClientRect();
+    wm.forEach(w => {
+      if (w.max) { syncNarrow(w); return; } // 最大化用 calc 自适应，无需重排
+      const ew = w.el.offsetWidth, eh = w.el.offsetHeight;
+      if (ew > dk.width - 8) { w.el.style.left = "2px"; w.el.style.width = Math.max(260, dk.width - 8) + "px"; }
+      else w.el.style.left = clamp(w.el.offsetLeft, 2, dk.width - ew - 6) + "px";
+      if (eh > dk.height - 42) { w.el.style.top = "0px"; w.el.style.height = Math.max(150, dk.height - 42) + "px"; }
+      else w.el.style.top = clamp(w.el.offsetTop, 0, Math.max(0, dk.height - eh - 42)) + "px";
+      syncNarrow(w);
+    });
+  }, 120);
+});
+
+/* ================= 资源管理器 ================= */
+function filterList(st) {
+  const q = (st.q || "").trim().toLowerCase();
+  let list = works.filter(w => {
+    if (st.char && w.characterId !== st.char) return false;
+    if (st.cat && !(w.categoryIds || []).includes(st.cat)) return false;
+    if (q) {
+      const c = charById.get(w.characterId);
+      if (!((w.name + " " + (w.description || "") + " " + (w.tags || []).join(" ") + " " + (c ? c.name : "")).toLowerCase().includes(q))) return false;
+    }
+    return true;
+  });
+  if (st.sort === "new") list = [...list].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  else if (st.sort === "old") list = [...list].sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+  else if (st.sort === "name") list = [...list].sort((a, b) => a.name.localeCompare(b.name, "zh"));
+  return list;
+}
+function openExplorer(charId) {
+  const c = charId ? charById.get(charId) : null;
+  makeWindow("explore:" + (charId || "all"), {
+    title: c ? c.name + " 娘文件夹" : "作品库 — 大肥鱼资源管理器",
+    icon: c ? "📁" : "🖼️",
+    w: 680, h: 460,
+    content: `
+      <div class="menubar"><span>文件(F)</span><span>编辑(E)</span><span>查看(V)</span><span>收藏(A)</span><span>帮助(H)</span></div>
+      <div class="toolbar">
+        <span>🔍</span><input class="in98 q" style="flex:1 1 130px" placeholder="搜索名称 / 描述 / 标签…" value="">
+        <select class="sel98 fchar"><option value="">全部角色</option>${activeChars.map(x => `<option value="${esc(x.id)}" ${charId === x.id ? "selected" : ""}>${esc(x.name)} ×${worksByChar.get(x.id).length}</option>`).join("")}</select>
+        <select class="sel98 fcat"><option value="">全部分类</option>${D.categories.map(x => `<option value="${esc(x.id)}">${esc(x.name)}</option>`).join("")}</select>
+        <select class="sel98 fsort"><option value="new">按日期↓</option><option value="old">按日期↑</option><option value="name">按名称</option></select>
+      </div>
+      <div class="toolbar" style="padding-top:0">
+        <span style="color:#333">地址:</span>
+        <span class="addr">C:\\大肥鱼\\${c ? esc(c.name) + "娘" : "作品库"}</span>
+      </div>
+      <div class="gridarea bevel-in"></div>
+      <div class="sbar"><span class="cnt">—</span><span>🐳 大肥鱼 OS 98</span></div>`,
+    after: win => {
+      const st = win.meta.st = { q: "", char: charId || "", cat: "", sort: "new", list: [] };
+      const grid = win.body.querySelector(".gridarea"), cnt = win.body.querySelector(".cnt");
+      const render = () => {
+        st.list = filterList(st);
+        cnt.textContent = `共 ${st.list.length} 个对象` + (st.list.length ? `（双击打开）` : "");
+        grid.innerHTML = st.list.map(w => `
+          <div class="fitem" data-slug="${esc(w.slug)}">
+            <img loading="lazy" decoding="async" src="${esc(w.thumb)}" alt="">
+            <span class="nm"><span class="no">No.${pad(thumbNo.get(w.slug), 3)}${isNew(w) ? ' <b class="newdot">NEW</b>' : ""}</span><br>${esc(w.name)}</span>
+          </div>`).join("") || `<div style="grid-column:1/-1;color:#666;padding:30px;text-align:center">这个文件夹是空的 —— 换个条件试试</div>`;
+      };
+      win.body.querySelector(".q").addEventListener("input", e => { st.q = e.target.value; render(); });
+      win.body.querySelector(".fchar").addEventListener("change", e => { st.char = e.target.value; render(); });
+      win.body.querySelector(".fcat").addEventListener("change", e => { st.cat = e.target.value; render(); });
+      win.body.querySelector(".fsort").addEventListener("change", e => { st.sort = e.target.value; render(); });
+      grid.addEventListener("click", e => {
+        const it = e.target.closest(".fitem"); if (!it) return;
+        grid.querySelectorAll(".fitem.sel").forEach(x => x.classList.remove("sel"));
+        it.classList.add("sel");
+        if (TOUCH) openViewer(it.dataset.slug, st.list);
+      });
+      grid.addEventListener("dblclick", e => {
+        const it = e.target.closest(".fitem"); if (it) openViewer(it.dataset.slug, st.list);
+      });
+      render();
+    }
+  });
+}
+
+/* ================= 图片查看器 ================= */
+function viewerHTML(w) {
+  const c = charById.get(w.characterId);
+  const cats = (w.categoryIds || []).map(id => catById.get(id)?.name).filter(Boolean).join(" · ");
+  return `
+    <div class="vwrap">
+      <div class="vimg bevel-in"><span class="tag">图版 No.${pad(thumbNo.get(w.slug), 3)} · ${w.width}×${w.height}</span><img src="${esc(w.large || w.thumb)}" data-alt="${esc(w.thumb)}" alt="${esc(w.name)}"></div>
+      <div class="vpanel">
+        <h2>${esc(w.name)}</h2>
+        <div class="meta"><span class="who" style="color:${esc(c ? c.colorDeep : "#000080")}">${esc(whoOf(w))}</span> · ${esc(cats || "未分类")} · ${new Date(w.createdAt).toLocaleDateString("zh-CN")}</div>
+        <div class="desc">${esc(w.description || "（本件暂无描述。）")}</div>
+        ${w.commentary ? `<div class="note bevel-in">${esc(w.commentary)}</div>` : ""}
+        <div class="tags">${(w.tags || []).map(t => `<i>${esc(t)}</i>`).join("")}</div>
+        <div class="vbtns">
+          <button class="btn98 bevel-out" data-a="prev">◀ 上一件</button>
+          <button class="btn98 bevel-out" data-a="next">下一件 ▶</button>
+        </div>
+        <div class="vbtns">
+          <a class="btn98 bevel-out" href="${esc(w.original || w.large)}" download target="_blank" rel="noopener">⬇ 下载原图</a>
+          <a class="btn98 bevel-out" href="${esc(w.page)}" target="_blank" rel="noopener">正式站 ↗</a>
+        </div>
+      </div>
+    </div>
+    <div class="sbar"><span class="pos">—</span><span>ESC 关闭 · ←→ 翻页</span></div>`;
+}
+function openViewer(slug, list) {
+  let w0 = works.find(x => x.slug === slug);
+  if (!w0) return;
+  list = (list && list.length ? list : works);
+  makeWindow("view:" + slug, {
+    title: w0.name + " — 图片查看器",
+    icon: "🖼️",
+    w: 660, h: 470,
+    content: viewerHTML(w0),
+    after: win => wireViewer(win, slug, list)
+  });
+}
+function wireViewer(win, slug, list) {
+  const w = works.find(x => x.slug === slug); if (!w) return;
+  let idx = list.findIndex(x => x.slug === slug);
+  if (idx < 0) { list = works; idx = works.findIndex(x => x.slug === slug); }
+  win.body.innerHTML = viewerHTML(w);
+  const pos = win.body.querySelector(".pos");
+  pos.textContent = `${idx + 1} / ${list.length} · ${esc(whoOf(w))}`;
+  const nav = d => {
+    const n = list[idx + d];
+    if (!n) { beep(160, .08, "square", .04); return; }
+    slug = n.slug; idx += d;
+    win.body.innerHTML = viewerHTML(n);
+    win.el.querySelector(".ttl").textContent = n.name + " — 图片查看器";
+    win.taskbtn.innerHTML = `🖼️ ${esc(n.name)} — 图片查看器`;
+    wireViewer(win, slug, list);
+  };
+  win.body.querySelector('[data-a="prev"]').addEventListener("click", () => nav(-1));
+  win.body.querySelector('[data-a="next"]').addEventListener("click", () => nav(1));
+  win.meta.nav = { left: () => nav(-1), right: () => nav(1), esc: () => closeWin(win.key) };
+  if (list.length <= 1) { win.body.querySelector('[data-a="prev"]').disabled = win.body.querySelector('[data-a="next"]').disabled = true; }
+}
+
+/* ================= 记事本 ================= */
+const ABOUT_TEXT = `
+<h3>🐳 关于「蓝色大肥鱼」</h3>
+非官方 AI 娘二创图片开放档案：DeepSeek 娘、GPT 娘、Claude 娘等 ${activeChars.length} 位角色的表情包、梗图、插画、设定图与漫画，现收录 <b>${works.length}</b> 件。
+<hr>
+<b>大肥鱼 OS 98 · 国庆纪念版</b><br>
+本系统是「2026 国庆网站前台设计征集」的投稿：把整个网站做成一台 1998 年的老电脑。
+双击桌面图标打开角色文件夹；窗口可以拖动、最小化、最大化；「开始」菜单里有随机一条和国庆烟花；图片双击后在查看器里翻页、下载原图。
+<hr>
+数据来自 starter/data.js；图片版权归原作者所有；本站与各 AI 产品官方无关。<br>
+最新同步：${new Date(D.syncedAt || Date.now()).toLocaleDateString("zh-CN")} · 正式站：蓝色大肥鱼.com`;
+function openAbout() {
+  makeWindow("about", {
+    title: "关于本站.txt — 记事本", icon: "📝", w: 480, h: 400,
+    content: `<div class="menubar"><span>文件(F)</span><span>编辑(E)</span><span>搜索(S)</span><span>帮助(H)</span></div>
+      <div class="notepad bevel-in">${ABOUT_TEXT}</div>
+      <div class="sbar"><span>第 1 行，第 1 列</span><span>UTF-8</span></div>`
+  });
+}
+function openWelcome() {
+  const dk = $("#desktop").getBoundingClientRect();
+  makeWindow("welcome", {
+    title: "欢迎使用 FISH OS 98", icon: "🐳", w: 430, h: 310,
+    x: Math.max(8, (dk.width - 430) / 2), y: Math.max(8, (dk.height - 310) / 2 - 30),
+    content: `<div class="notepad bevel-in" style="text-align:center">
+      <h3>🐳 欢迎使用大肥鱼 OS 98</h3>
+      <p>把网站当电脑用：</p>
+      <p style="text-align:left;padding:0 18px">
+      · 双击桌面 <b>文件夹</b> 浏览角色作品<br>
+      · 双击图片用 <b>查看器</b> 打开（可翻页/下载）<br>
+      · 按住<b>标题栏拖动</b>；拖<b>右下角/边缘</b>缩放窗口<br>
+      · 双击标题栏或按 □ <b>最大化</b>；✕ 关闭<br>
+      · 「开始」菜单：🎲 随机一条 / 🎉 国庆烟花<br>
+      · 任务栏右侧 🔊 静音，M 键也行</p>
+      <p style="color:#555">祝第 77 个国庆快乐！</p></div>
+      <div class="sbar"><span>提示</span><span>点 ✕ 关闭本窗口</span></div>`
+  });
+}
+function openRecycle() {
+  makeWindow("bin", {
+    title: "回收站", icon: "🗑️", w: 340, h: 200,
+    content: `<div class="notepad bevel-in" style="display:grid;place-items:center;text-align:center">🗑️<br><b>回收站是空的</b><br><span style="color:#555">在大肥鱼 OS 里，没有任何作品会被扔掉。</span></div>
+      <div class="sbar"><span>0 个对象</span><span>🐳</span></div>`
+  });
+}
+/* 烟花 */
+function openFireworks() {
+  makeWindow("fw", {
+    title: "国庆快乐.exe", icon: "🎉", w: 400, h: 330,
+    content: `<canvas class="fwcanvas" width="368" height="230"></canvas>
+      <div class="fwcap">🎉 祝 蓝色大肥鱼 和所有 AI 娘 —— 第 77 个国庆快乐！</div>
+      <div class="sbar"><span>烟花引擎运行中</span><span>Celebration v7.7</span></div>`,
+    after: win => {
+      const cv2 = win.body.querySelector("canvas"), cx = cv2.getContext("2d");
+      const rockets = [], sparks = [];
+      let raf = 0, t = 0;
+      const colors = ["#ffd23f", "#ff4d5e", "#3ddc84", "#8fa6ff", "#ffffff"];
+      const loop = () => {
+        t++;
+        cx.fillStyle = "rgba(0,0,0,.22)"; cx.fillRect(0, 0, cv2.width, cv2.height);
+        if (t % 34 === 0) rockets.push({ x: 30 + Math.random() * (cv2.width - 60), y: cv2.height, vy: -(3.2 + Math.random() * 1.6), c: colors[t / 34 % colors.length | 0] });
+        for (let i = rockets.length - 1; i >= 0; i--) {
+          const r = rockets[i];
+          r.y += r.vy; r.vy += .07;
+          cx.fillStyle = "#fff"; cx.fillRect(r.x, r.y, 2, 4);
+          if (r.vy > -1.1) {
+            rockets.splice(i, 1);
+            for (let k = 0; k < 42; k++) { const a = Math.random() * 6.283, v = 1 + Math.random() * 2.4; sparks.push({ x: r.x, y: r.y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, life: 36 + Math.random() * 26, c: r.c }); }
+            beep(880 + Math.random() * 500, .05, "triangle", .025);
+          }
+        }
+        for (let i = sparks.length - 1; i >= 0; i--) {
+          const s = sparks[i];
+          s.x += s.vx; s.y += s.vy; s.vy += .045;
+          cx.globalAlpha = clamp(s.life / 40, 0, 1); cx.fillStyle = s.c; cx.fillRect(s.x, s.y, 2, 2);
+          if (--s.life <= 0) sparks.splice(i, 1);
+        }
+        cx.globalAlpha = 1;
+        cx.fillStyle = "#ffd23f"; cx.font = "700 13px Tahoma";
+        cx.fillText("2026 · 10 · 01", 14, 22);
+        raf = requestAnimationFrame(loop);
+      };
+      raf = requestAnimationFrame(loop);
+      win.onClose = () => cancelAnimationFrame(raf);
+    }
+  });
+}
+
+/* ================= 桌面图标 ================= */
+const topChars = [...activeChars].sort((a, b) => worksByChar.get(b.id).length - worksByChar.get(a.id).length).slice(0, 3);
+const ICONS = [
+  { em: "🖼️", label: `作品库（${works.length}）`, open: () => openExplorer("") },
+  ...topChars.map(c => ({ em: "📁", label: `${c.name}（${worksByChar.get(c.id).length}）`, open: () => openExplorer(c.id) })),
+  { em: "📁", label: "其他角色…", open: () => openExplorer("") },
+  { em: "🎉", label: "国庆快乐.exe", open: openFireworks },
+  { em: "📝", label: "关于本站.txt", open: openAbout },
+  { em: "🕹️", label: "图鉴版.htm", open: () => window.open("../fish-dex/index.html", "_blank") },
+  { em: "📖", label: "月刊版.htm", open: () => window.open("../magazine/index.html", "_blank") },
+  { em: "🗑️", label: "回收站", open: openRecycle },
+];
+$("#icons").innerHTML = ICONS.map((it, i) => `<div class="dicon" data-i="${i}"><span class="em">${it.em}</span><span>${esc(it.label)}</span></div>`).join("");
+$("#icons").addEventListener("click", e => {
+  const d = e.target.closest(".dicon"); if (!d) return;
+  $("#icons").querySelectorAll(".dicon.sel").forEach(x => x.classList.remove("sel"));
+  d.classList.add("sel");
+  if (TOUCH) ICONS[+d.dataset.i].open();
+});
+$("#icons").addEventListener("dblclick", e => {
+  const d = e.target.closest(".dicon"); if (d) ICONS[+d.dataset.i].open();
+});
+
+/* ================= 开始菜单 / 任务栏 ================= */
+const smenu = $("#smenu");
+$("#startbtn").addEventListener("click", e => { e.stopPropagation(); smenu.style.display = smenu.style.display === "block" ? "none" : "block"; });
+document.addEventListener("pointerdown", e => { if (!e.target.closest("#smenu") && !e.target.closest("#startbtn")) smenu.style.display = "none"; });
+smenu.addEventListener("click", e => {
+  const it = e.target.closest(".smitem"); if (!it) return;
+  smenu.style.display = "none";
+  const act = it.dataset.act;
+  if (act === "explore") openExplorer("");
+  else if (act === "random") openViewer(works[Math.floor(Math.random() * works.length)].slug, works);
+  else if (act === "fw") openFireworks();
+  else if (act === "about") openAbout();
+  else if (act === "off") { closeAll(); $("#off").style.display = "grid"; beep(220, .3, "sine", .06); }
+});
+function closeAll() { [...wm.keys()].forEach(closeWin); }
+$("#off").addEventListener("click", () => location.reload());
+
+function tickClock() { const d = new Date(); $("#clock").textContent = pad(d.getHours(), 2) + ":" + pad(d.getMinutes(), 2); }
+tickClock(); setInterval(tickClock, 15000);
+
+addEventListener("keydown", e => {
+  if (e.key === "m" || e.key === "M") { muted = !muted; $("#spk").textContent = muted ? "🔇" : "🔊"; return; }
+  if (e.key === "Escape") {
+    if (smenu.style.display === "block") { smenu.style.display = "none"; return; }
+    if (activeKey) closeWin(activeKey);
+    return;
+  }
+  if (["ArrowLeft", "ArrowRight"].includes(e.key) && activeKey) {
+    const w = wm.get(activeKey);
+    if (w && w.meta.nav) { e.preventDefault(); e.key === "ArrowLeft" ? w.meta.nav.left() : w.meta.nav.right(); }
+  }
+});
+
+/* ================= 开机 ================= */
+function endBoot() {
+  const b = $("#boot");
+  if (!b || b.style.display === "none") return;
+  clearInterval(bootTimer);
+  b.style.display = "none";
+  ac(); if (audio && audio.state === "suspended") audio.resume();
+  sfxChime();
+  openWelcome();
+}
+$("#boot").addEventListener("click", endBoot);
+setTimeout(endBoot, 2400);
+
+/* 测试钩子 */
+window.__os = { openExplorer, openViewer, wm, openFireworks, openAbout };
+</script>
+</body>
+</html>
